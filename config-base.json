@@ -1,0 +1,13 @@
+{
+    "tcpPort": 8088,
+    "maxConnections": 5,
+    "appPackage": "zuhause.ws",
+    "dbConfigs": {
+        "localhost": {
+            "driver": "com.mysql.jdbc.Driver",
+            "url": "jdbc:mysql://localhost:3306/zuhause?zeroDateTimeBehavior\u003dconvertToNull",
+            "user": "root",
+            "password": "123456"
+        }
+    }
+}
