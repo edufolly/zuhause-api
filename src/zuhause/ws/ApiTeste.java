@@ -1,7 +1,6 @@
 package zuhause.ws;
 
 import java.io.IOException;
-import java.util.Map;
 import jssc.SerialPortException;
 import zuhause.annotations.GET;
 import zuhause.annotations.Path;

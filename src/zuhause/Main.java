@@ -29,6 +29,9 @@ public class Main {
             EndpointCache.init();
 
             ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
+            serverlog.msg(0, "Start");
+            serverlog.msg(0, "Start");
+            serverlog.msg(0, "Start");
             serverlog.msg(0, "API Server aguardando conexões na porta " + porta + ".");
 
             while (true) {

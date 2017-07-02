@@ -19,6 +19,27 @@ public class TerminalHelper {
      * @param command
      * @return
      * @throws IOException
+     */
+    public static String rawExecute(String command) throws IOException {
+        Runtime rt = Runtime.getRuntime();
+        Process p = rt.exec(command);
+        StringBuilder sb = new StringBuilder();
+
+        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String line;
+
+        while ((line = input.readLine()) != null) {
+            sb.append(line);
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     *
+     * @param command
+     * @return
+     * @throws IOException
      * @throws InterruptedException
      */
     public static List<Map<String, String>> execute(String command)
