@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.Map;
 import zuhause.db.DbConfig;
+import zuhause.serial.Serial;
 
 /**
  *
@@ -19,6 +20,7 @@ public class Config {
     private int maxConnections;
     private String appPackage;
     private Map<String, DbConfig> dbConfigs;
+    private Map<String, Serial> serialConfigs;
 
     private static transient Config INSTANCE = null;
 
@@ -101,6 +103,14 @@ public class Config {
 
     public void setDbConfigs(Map<String, DbConfig> dbConfigs) {
         this.dbConfigs = dbConfigs;
+    }
+
+    public Map<String, Serial> getSerialConfigs() {
+        return serialConfigs;
+    }
+
+    public void setSerialConfigs(Map<String, Serial> serialConfigs) {
+        this.serialConfigs = serialConfigs;
     }
 
 }

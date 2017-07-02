@@ -1,10 +1,12 @@
 package zuhause.db;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Eduardo Folly
  */
-public class DbConfig {
+public class DbConfig implements Serializable {
 
     private String driver;
     private String url;

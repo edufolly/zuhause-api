@@ -14,11 +14,11 @@ public class DbUtil {
 
     public static Connection getConnection(DbConfig config) throws ClassNotFoundException, SQLException, Exception {
         Class.forName(config.getDriver());
-        
+
         try {
             return DriverManager.getConnection(config.getUrl(),
                     config.getUser(), config.getPassword());
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             throw new Exception("Erro ao conectar com o servidor.", e);
         }
     }

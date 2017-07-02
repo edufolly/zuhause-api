@@ -9,5 +9,14 @@
             "user": "root",
             "password": "123456"
         }
+    },
+    "serialConfigs": {
+        "arduino": {
+            "dev": "/dev/ttyACM0",
+            "baundrate": 9600,
+            "databits": 8,
+            "stopbits": 1,
+            "parity": 0
+        }
     }
 }
