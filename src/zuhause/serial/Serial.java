@@ -19,7 +19,7 @@ public class Serial implements Serializable {
     private int stopbits;
     private int parity;
 
-    private final long timeout = 3000;
+    private final long timeout = 5000;
     private final long sleep = 50;
 
     private transient SerialPort serialPort = null;

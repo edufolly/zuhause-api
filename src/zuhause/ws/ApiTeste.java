@@ -1,12 +1,7 @@
 package zuhause.ws;
 
-import java.io.IOException;
-import jssc.SerialPortException;
 import zuhause.annotations.GET;
 import zuhause.annotations.Path;
-import zuhause.annotations.PathParam;
-import zuhause.serial.Serial;
-import zuhause.util.Config;
 
 /**
  *
@@ -20,17 +15,17 @@ public class ApiTeste {
         return "Teste OK!!";
     }
 
-    @GET
-    @Path("/serial/:cmd")
-    @PathParam({"cmd"})
-    public String SerialGET(String cmd) throws SerialPortException, IOException {
-
-        Serial arduino = Config.getInstance().getSerialConfigs().get("arduino");
-
-        arduino.write(cmd.substring(0, 1));
-
-        return arduino.waitFor("#");
-    }
+//    @GET
+//    @Path("/serial/:cmd")
+//    @PathParam({"cmd"})
+//    public String SerialGET(String cmd) throws SerialPortException, IOException {
+//
+//        Serial arduino = Config.getInstance().getSerialConfigs().get("arduino");
+//
+//        arduino.write(cmd.substring(0, 1));
+//
+//        return arduino.waitFor("#");
+//    }
 
     /**
      *
