@@ -18,5 +18,13 @@
             "stopbits": 1,
             "parity": 0
         }
+    },
+    "routerConfigs": {
+        "WRN240": {
+            "host": "10.0.0.1",
+            "user": "admin",
+            "password": "123456",
+            "internalType": "zuhause.router.intelbras.WRN240"
+        }
     }
 }

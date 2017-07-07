@@ -4,12 +4,17 @@ import zuhause.util.Config;
 import zuhause.util.ServerLog;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author Eduardo Folly
  */
 public class Main {
+
+    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
 
     /**
      *
@@ -27,7 +32,11 @@ public class Main {
             porta = config.getTcpPort();
 
             EndpointCache.init();
-
+            /*
+            // TODO - Implementar configurável.
+            SCHEDULER.scheduleAtFixedRate(new TempScheduler(),
+                    0, 5, TimeUnit.MINUTES);
+             */
             ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
             serverlog.msg(0, "Start");
             serverlog.msg(0, "Start");

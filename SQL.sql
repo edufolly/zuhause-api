@@ -1,0 +1,7 @@
+CREATE TABLE `zuhause`.`pairs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `key` VARCHAR(50) NOT NULL,
+  `value` VARCHAR(50) NULL,
+  `when` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `KEY_WHEN` (`key` ASC, `when` ASC));

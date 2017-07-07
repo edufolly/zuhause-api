@@ -14,6 +14,8 @@ import java.util.Map;
  */
 public class TerminalHelper {
 
+    // TODO - Existe um bug quando o comando retorna somente 2 linhas.
+    
     /**
      *
      * @param command
@@ -30,6 +32,7 @@ public class TerminalHelper {
 
         while ((line = input.readLine()) != null) {
             sb.append(line);
+            sb.append("\n");
         }
 
         return sb.toString();

@@ -2,11 +2,15 @@ package zuhause.ws;
 
 import com.google.common.base.CharMatcher;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import zuhause.annotations.GET;
 import zuhause.annotations.Path;
+import zuhause.util.DateUtil;
 import zuhause.util.TerminalHelper;
 
 /**
@@ -56,7 +60,7 @@ public class ApiRaspiStats {
     @Path("/temp")
     @GET
     public Map<String, Object> TempGET() throws IOException {
-        String temp = TerminalHelper.rawExecute("/opt/vc/bin/vcgencmd measure_temp");
+        String temp = TerminalHelper.rawExecute("/opt/vc/bin/vcgencmd measure_temp").trim();
 
         String[] p = temp.split("=");
         String[] q = p[1].split("'");
@@ -77,7 +81,7 @@ public class ApiRaspiStats {
     @Path("/volts")
     @GET
     public Map<String, Object> VoltsGET() throws IOException {
-        String temp = TerminalHelper.rawExecute("/opt/vc/bin/vcgencmd measure_volts");
+        String temp = TerminalHelper.rawExecute("/opt/vc/bin/vcgencmd measure_volts").trim();
 
         String[] p = temp.split("=");
 
@@ -88,6 +92,7 @@ public class ApiRaspiStats {
                 .or(CharMatcher.is('.'))
                 .or(CharMatcher.is('-'))
                 .retainFrom(p[1])));
+        mapa.put("unit", "V");
 
         return mapa;
     }
@@ -95,17 +100,36 @@ public class ApiRaspiStats {
     /**
      *
      * @return @throws IOException
+     * @throws ParseException
      */
     @Path("/uptime")
     @GET
-    public Map<String, String> UptimeGET() throws IOException {
-        String since = TerminalHelper.rawExecute("uptime -s");
+    public Map<String, String> UptimeGET() throws IOException, ParseException {
+        String since = TerminalHelper.rawExecute("uptime -s").trim();
 
         Map<String, String> mapa = new HashMap();
 
         mapa.put("since", since);
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        Date uptime = sdf.parse(since);
+
+        mapa.put("uptime", DateUtil.humanDateDifference(uptime, new Date()));
+
         return mapa;
+    }
+
+    /**
+     *
+     * @return @throws IOException
+     * @throws java.lang.InterruptedException
+     */
+    @Path("/proc")
+    @GET
+    public List<Map<String, String>> ProcGET() throws IOException, InterruptedException {
+        // sudo apt-get install sysstat
+        return TerminalHelper.execute("mpstat -P ON", 2);
     }
 
 }

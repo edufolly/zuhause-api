@@ -1,6 +1,8 @@
 package zuhause.util;
 
 import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -8,6 +10,7 @@ import java.net.InetAddress;
  */
 public class ServerLog {
 
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final ServerLog INSTANCE;
 
     static {
@@ -19,27 +22,29 @@ public class ServerLog {
     }
 
     public void conectado(int id, InetAddress address, int port) {
-        System.out.println("[" + id + "] - Conectado: " + address + ":" + port);
+        System.out.println("[" + SDF.format(new Date()) + "] ["
+                + id + "] - Conectado: " + address + ":" + port);
     }
 
     public void desconectado(int id) {
-        System.out.println("[" + id + "] - Desconectado.");
+        System.out.println("[" + SDF.format(new Date()) + "] ["
+                + id + "] - Desconectado.");
     }
 
     public void erro(int id, Throwable t) {
-        System.err.println("[" + id + "] - Erro: " + t.getMessage());
+        System.out.println("[" + SDF.format(new Date()) + "] ["
+                + id + "] - Erro: " + t.getMessage());
         t.printStackTrace();
     }
 
     public void erro(int id, String msg) {
-        System.err.println("[" + id + "] - Erro: " + msg);
+        System.out.println("[" + SDF.format(new Date()) + "] ["
+                + id + "] - Erro: " + msg);
     }
 
-//    public void request(int id, HttpRequest request) {
-//        System.out.println("[" + id + "] - Request: " + request.getHeaderLine());
-//    }
     public void msg(int id, String msg) {
-        System.out.println("[" + id + "] - " + msg);
+        System.out.println("[" + SDF.format(new Date()) + "] ["
+                + id + "] - " + msg);
     }
 
     public void fatal(int id, Throwable t) {

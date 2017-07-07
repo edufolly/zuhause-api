@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.Map;
 import zuhause.db.DbConfig;
+import zuhause.router.Router;
 import zuhause.serial.Serial;
 
 /**
@@ -16,11 +17,11 @@ import zuhause.serial.Serial;
 public class Config {
 
     private int tcpPort;
-    private int wsPort;
     private int maxConnections;
     private String appPackage;
     private Map<String, DbConfig> dbConfigs;
     private Map<String, Serial> serialConfigs;
+    private Map<String, Router> routerConfigs;
 
     private static transient Config INSTANCE = null;
 
@@ -73,44 +74,84 @@ public class Config {
         this.tcpPort = tcpPort;
     }
 
-    public int getWsPort() {
-        return wsPort;
-    }
-
-    public void setWsPort(int wsPort) {
-        this.wsPort = wsPort;
-    }
-
+    /**
+     *
+     * @return
+     */
     public int getMaxConnections() {
         return maxConnections;
     }
 
+    /**
+     *
+     * @param maxConnections
+     */
     public void setMaxConnections(int maxConnections) {
         this.maxConnections = maxConnections;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getAppPackage() {
         return appPackage;
     }
 
+    /**
+     *
+     * @param appPackage
+     */
     public void setAppPackage(String appPackage) {
         this.appPackage = appPackage;
     }
 
+    /**
+     *
+     * @return
+     */
     public Map<String, DbConfig> getDbConfigs() {
         return dbConfigs;
     }
 
+    /**
+     *
+     * @param dbConfigs
+     */
     public void setDbConfigs(Map<String, DbConfig> dbConfigs) {
         this.dbConfigs = dbConfigs;
     }
 
+    /**
+     *
+     * @return
+     */
     public Map<String, Serial> getSerialConfigs() {
         return serialConfigs;
     }
 
+    /**
+     *
+     * @param serialConfigs
+     */
     public void setSerialConfigs(Map<String, Serial> serialConfigs) {
         this.serialConfigs = serialConfigs;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Map<String, Router> getRouterConfigs() {
+        return routerConfigs;
+    }
+
+    /**
+     *
+     * @param routerConfigs
+     */
+    public void setRouterConfigs(Map<String, Router> routerConfigs) {
+        this.routerConfigs = routerConfigs;
     }
 
 }
