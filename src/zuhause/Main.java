@@ -32,11 +32,11 @@ public class Main {
             porta = config.getTcpPort();
 
             EndpointCache.init();
-            /*
+/*
             // TODO - Implementar configurável.
             SCHEDULER.scheduleAtFixedRate(new TempScheduler(),
                     0, 5, TimeUnit.MINUTES);
-             */
+*/
             ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
             serverlog.msg(0, "Start");
             serverlog.msg(0, "Start");

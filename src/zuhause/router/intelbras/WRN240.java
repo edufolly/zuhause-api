@@ -88,7 +88,7 @@ public class WRN240 extends Router {
                     dhcpClient.setClient(scriptObj.get(String.valueOf(j)).toString());
                     dhcpClient.setMac(scriptObj.get(String.valueOf(j + 1)).toString());
                     dhcpClient.setIp(scriptObj.get(String.valueOf(j + 2)).toString());
-                    dhcpClient.setTime(scriptObj.get(String.valueOf(j + 3)).toString());
+                    dhcpClient.setExtra(scriptObj.get(String.valueOf(j + 3)).toString());
 
                     lista.add(dhcpClient);
                 }

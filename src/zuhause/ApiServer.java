@@ -19,13 +19,13 @@ import zuhause.util.Response;
  */
 public class ApiServer extends Thread {
 
-    private static final Locale locale = new Locale("en", "US");
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", locale);
+    private static final Locale LOCALE = new Locale("en", "US");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", LOCALE);
     //--
     private Socket connectedClient = null;
 
     static {
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        SDF.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
     /**
@@ -107,6 +107,9 @@ public class ApiServer extends Thread {
         }
     }
 
+    /**
+     *
+     */
     class Erro {
 
         private String mensagem;

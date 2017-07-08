@@ -11,41 +11,93 @@ public class DhcpClient implements Serializable {
     private String client;
     private String mac;
     private String ip;
-    private String time;
+    private String extra;
 
+    /**
+     *
+     */
     public DhcpClient() {
     }
 
+    /**
+     *
+     * @return
+     */
     public String getClient() {
         return client;
     }
 
-    public void setClient(String client) {
+    /**
+     *
+     * @param client
+     * @return
+     */
+    public DhcpClient setClient(String client) {
         this.client = client;
+        return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getMac() {
         return mac;
     }
 
-    public void setMac(String mac) {
+    /**
+     *
+     * @param mac
+     * @return
+     */
+    public DhcpClient setMac(String mac) {
         this.mac = mac;
+        return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getIp() {
         return ip;
     }
 
-    public void setIp(String ip) {
+    /**
+     *
+     * @param ip
+     * @return
+     */
+    public DhcpClient setIp(String ip) {
         this.ip = ip;
+        return this;
     }
 
-    public String getTime() {
-        return time;
+    /**
+     *
+     * @return
+     */
+    public String getExtra() {
+        return extra;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    /**
+     *
+     * @param extra
+     * @return
+     */
+    public DhcpClient setExtra(String extra) {
+        this.extra = extra;
+        return this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public String toString() {
+        return "DhcpClient{" + "client=" + client + ", mac=" + mac + ", ip=" + ip + ", extra=" + extra + '}';
     }
 
 }

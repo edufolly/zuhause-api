@@ -6,6 +6,7 @@ import java.util.Map;
 import zuhause.db.DbConfig;
 import zuhause.db.DbUtil;
 import zuhause.util.Config;
+import zuhause.util.ServerLog;
 import zuhause.ws.ApiArduino;
 
 /**
@@ -15,6 +16,7 @@ import zuhause.ws.ApiArduino;
 public class TempScheduler implements Runnable {
 
     private static final DbConfig DB_CONFIG = Config.getInstance().getDbConfigs().get("localhost");
+    private static final ServerLog LOG = ServerLog.getInstance();
 
     @Override
     public void run() {
@@ -32,6 +34,8 @@ public class TempScheduler implements Runnable {
                     + "(`key`, `value`) VALUES ('tempInterna', '" + temp + "');");
 
             statement.close();
+
+            LOG.msg(0, "TempScheduler");
 
             connection.close();
         } catch (Exception ex) {
