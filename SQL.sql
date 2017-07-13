@@ -1,7 +1,10 @@
-CREATE TABLE `zuhause`.`pairs` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `key` VARCHAR(50) NOT NULL,
-  `value` VARCHAR(50) NULL,
-  `when` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE `pairs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tab` varchar(50) CHARACTER SET utf8 NOT NULL,
+  `key` varchar(50) COLLATE utf8_bin NOT NULL,
+  `value` varchar(50) COLLATE utf8_bin DEFAULT NULL,
+  `when` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  INDEX `KEY_WHEN` (`key` ASC, `when` ASC));
+  KEY `KEY_WHEN` (`when`,`tab`,`key`),
+  KEY `KEY_TAB` (`tab`,`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=1019 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;

@@ -4,6 +4,7 @@ import com.google.common.base.CharMatcher;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -132,4 +133,39 @@ public class ApiRaspiStats {
         return TerminalHelper.execute("mpstat -P ON", 2);
     }
 
+    @Path("/arp")
+    @GET
+    public Map<String, String> getArp() throws IOException {
+        // sudo apt-get install arp-scan
+
+        Map<String, String> mapa = new HashMap();
+
+        String as = TerminalHelper.rawExecute("sudo arp-scan -l -g -q");
+
+        String[] arpscan = as.split("\\n");
+
+        if (arpscan.length > 2) {
+            for (int i = 2; i < arpscan.length; i++) {
+                String linha = arpscan[i].trim();
+                if (linha.isEmpty()) {
+                    break;
+                }
+                String[] p = linha.split("\\t");
+                if (p.length > 1) {
+                    mapa.put(p[1].toUpperCase().replaceAll(":", "-"), p[0]);
+                }
+            }
+        }
+        return mapa;
+    }
+
+    /*
+    @Path("/iftop")
+    @GET
+    public Map<String, String> iftopGET() throws IOException, ParseException {
+        String iftop = TerminalHelper.rawExecute("sudo iftop -t -s 2").trim();
+        System.out.println(iftop);
+        return null;
+    }
+     */
 }

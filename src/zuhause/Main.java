@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Main {
 
-    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
+    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(2);
 
     /**
      *
@@ -36,6 +36,9 @@ public class Main {
             // TODO - Implementar configurável.
             SCHEDULER.scheduleAtFixedRate(new TempScheduler(),
                     0, 5, TimeUnit.MINUTES);
+
+            SCHEDULER.scheduleAtFixedRate(new RouterScheduler(),
+                    0, 1, TimeUnit.MINUTES);
 */
             ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
             serverlog.msg(0, "Start");

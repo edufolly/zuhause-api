@@ -8,7 +8,7 @@ import java.io.Serializable;
  */
 public class DhcpClient implements Serializable {
 
-    private String client;
+    private String name;
     private String mac;
     private String ip;
     private String extra;
@@ -23,8 +23,8 @@ public class DhcpClient implements Serializable {
      *
      * @return
      */
-    public String getClient() {
-        return client;
+    public String getName() {
+        return name;
     }
 
     /**
@@ -33,7 +33,7 @@ public class DhcpClient implements Serializable {
      * @return
      */
     public DhcpClient setClient(String client) {
-        this.client = client;
+        this.name = client;
         return this;
     }
 
@@ -97,7 +97,7 @@ public class DhcpClient implements Serializable {
      */
     @Override
     public String toString() {
-        return "DhcpClient{" + "client=" + client + ", mac=" + mac + ", ip=" + ip + ", extra=" + extra + '}';
+        return "DhcpClient{" + "client=" + name + ", mac=" + mac + ", ip=" + ip + ", extra=" + extra + '}';
     }
 
 }

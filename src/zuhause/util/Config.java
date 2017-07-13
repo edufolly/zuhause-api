@@ -52,6 +52,18 @@ public class Config {
         return INSTANCE;
     }
 
+    public static DbConfig getDbConfig(String config) {
+        return Config.getInstance().getDbConfigs().get(config);
+    }
+
+    public static Serial getSerial(String serial) {
+        return Config.getInstance().getSerialConfigs().get(serial);
+    }
+
+    public static Router getRouter(String router) throws Exception {
+        return Config.getInstance().getRouterConfigs().get(router).parse();
+    }
+
     /**
      *
      */
