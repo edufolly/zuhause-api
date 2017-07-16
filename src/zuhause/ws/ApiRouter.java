@@ -36,7 +36,10 @@ public class ApiRouter {
         public String ip;
         public String mac;
         public String name;
-        public boolean online;
+        public boolean online = false;
+        public int idHost = -1;
+        public int idRule = -1;
+        public boolean paused = false;
     }
 
     /**
@@ -77,7 +80,7 @@ public class ApiRouter {
                 rc.ip = client.getIp();
             } else {
                 RouterConfig rc = new RouterConfig();
-                rc.name = client.getName().isEmpty() ? "?" : client.getName();
+                rc.name = client.getName().isEmpty() ? "DHCP Find" : client.getName();
                 rc.mac = client.getMac();
                 rc.ip = client.getIp();
 
@@ -104,7 +107,7 @@ public class ApiRouter {
                 rc.online = true;
             } else {
                 RouterConfig rc = new RouterConfig();
-                rc.name = "?";
+                rc.name = "ARP Find";
                 rc.mac = mac;
                 rc.ip = arp.get(mac).toString();
                 rc.online = true;
@@ -119,13 +122,53 @@ public class ApiRouter {
          * Conectados no roteador.
          */
         Set<String> macs = router.getConnected();
-
         for (String mac : macs) {
             if (lista.containsKey(mac)) {
                 RouterConfig rc = lista.get(mac);
                 rc.online = true;
+            } else {
+                RouterConfig rc = new RouterConfig();
+                rc.name = "Router Connected";
+                rc.mac = mac;
+                rc.ip = "?";
+                rc.online = true;
+
+                dao.Insert("resolve_mac", rc.mac, rc.name);
+
+                lista.put(rc.mac, rc);
             }
         }
+
+        /**
+         * Hosts cadastrados no roteador.
+         */
+        List<String> hosts = getHostList();
+        for (int i = 0; i < hosts.size(); i++) {
+            String host = hosts.get(i);
+            if (lista.containsKey(host)) {
+                RouterConfig rc = lista.get(host);
+                rc.idHost = i;
+            }
+        }
+
+        /**
+         * Regras cadastradas no roteador.
+         */
+        List<Rule> rules = getRuleList();
+        for (int i = 0; i < rules.size(); i++) {
+            Rule rule = rules.get(i);
+            if (lista.containsKey(rule.getHost())) {
+                RouterConfig rc = lista.get(rule.getHost());
+                rc.idRule = i;
+                if (rule.getStatus() == 1) {
+                    rc.paused = true;
+                }
+            }
+        }
+
+        /**
+         *
+         */
         List<RouterConfig> retorno = new ArrayList<>(lista.values());
 
         Collections.sort(retorno, new Comparator<RouterConfig>() {
@@ -230,6 +273,45 @@ public class ApiRouter {
     @GET
     public List<Rule> getRuleList() throws Exception {
         return Config.getRouter("WRN240").ruleList();
+    }
+
+    /**
+     *
+     * @param mac
+     * @return JSON
+     * @throws Exception
+     */
+    @Path("/rule/create/:mac")
+    @GET
+    @PathParam({"mac"})
+    public List<Rule> getRuleCreate(String mac) throws Exception {
+        return Config.getRouter("WRN240").ruleCreate(mac);
+    }
+
+    /**
+     *
+     * @param idRule
+     * @return JSON
+     * @throws Exception
+     */
+    @Path("/rule/pause/:idRule")
+    @GET
+    @PathParam({"idRule"})
+    public List<Rule> getRulePause(int idRule) throws Exception {
+        return Config.getRouter("WRN240").rulePause(idRule);
+    }
+
+    /**
+     *
+     * @param idRule
+     * @return JSON
+     * @throws Exception
+     */
+    @Path("/rule/play/:idRule")
+    @GET
+    @PathParam({"idRule"})
+    public List<Rule> getRulePplay(int idRule) throws Exception {
+        return Config.getRouter("WRN240").rulePlay(idRule);
     }
 
 }

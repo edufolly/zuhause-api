@@ -2,6 +2,7 @@ package zuhause;
 
 import java.util.List;
 import java.util.Set;
+import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.db.Pair;
 import zuhause.db.PairDao;
@@ -22,6 +23,8 @@ public class RouterScheduler implements Runnable {
     public void run() {
         try {
             PairDao dao = new PairDao(DB_CONFIG);
+
+            TelegramBot telegramBot = Config.getTelegramBot("zuhause_iot_bot");
 
             List<Pair> pairs = dao.selectTab("monitora_mac");
 
@@ -51,6 +54,8 @@ public class RouterScheduler implements Runnable {
                     if (save) {
                         ativo = macs.contains(mac);
                         dao.Insert("mac_status", mac, booleanToString(ativo));
+                        telegramBot.sendMessage(pair.getValue()
+                                + (ativo ? " chegou em" : " saiu de") + " casa.");
                     }
                 }
             }

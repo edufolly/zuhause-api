@@ -1,0 +1,165 @@
+package zuhause.bot;
+
+import com.google.gson.Gson;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.List;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import zuhause.db.DbConfig;
+import zuhause.db.Pair;
+import zuhause.db.PairDao;
+import zuhause.util.Config;
+import zuhause.util.ServerLog;
+
+/**
+ *
+ * @author Eduardo Folly
+ */
+public class TelegramBot implements Serializable, Runnable {
+
+    private String scheme;
+    private String host;
+    private String token;
+    private String name;
+
+    private transient static OkHttpClient client;
+
+    private transient static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
+    private transient static final ServerLog LOG = ServerLog.getInstance();
+    private transient static final Gson GSON = new Gson();
+
+    /**
+     *
+     */
+    public TelegramBot() {
+    }
+
+    /**
+     *
+     * @param url
+     * @return String
+     * @throws IOException
+     */
+    private String get(HttpUrl url) throws IOException {
+        if (client == null) {
+            client = new OkHttpClient.Builder()
+                    .build();
+        }
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .addHeader("cache-control", "no-cache")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+            return response.body().string();
+        }
+    }
+
+    /**
+     *
+     * @param text
+     * @return boolean
+     * @throws Exception
+     */
+    public Boolean sendMessage(String text) throws Exception {
+        PairDao dao = new PairDao(DB_CONFIG);
+
+        List<Pair> p = dao.select("`tab` = ? AND `key` = ?",
+                new String[]{"telegram_bot", "send_to"});
+
+        String resp = "";
+
+        for (Pair pair : p) {
+
+            HttpUrl url = new HttpUrl.Builder()
+                    .scheme(scheme)
+                    .host(host)
+                    .addPathSegment("bot" + token)
+                    .addPathSegment("sendMessage")
+                    .addQueryParameter("chat_id", pair.getValue())
+                    .addQueryParameter("text", text)
+                    .build();
+
+            resp = get(url);
+
+            LOG.msg(999, resp);
+        }
+
+        return !resp.isEmpty();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void run() {
+        PairDao dao = new PairDao(DB_CONFIG);
+
+        try {
+            List<Pair> p = dao.select("`tab` = ? AND `key` = ?",
+                    new String[]{"telegram_bot", name},
+                    "`when` DESC", "1");
+
+            Pair pair;
+
+            if (p.isEmpty()) {
+                pair = new Pair();
+                pair.setTab("telegram_bot");
+                pair.setKey(name);
+                pair.setValue("0");
+            } else {
+                pair = p.get(0);
+            }
+
+            int offset = Integer.parseInt(pair.getValue());
+
+            HttpUrl url = new HttpUrl.Builder()
+                    .scheme(scheme)
+                    .host(host)
+                    .addPathSegment("bot" + token)
+                    .addPathSegment("getUpdates")
+                    .addQueryParameter("offset", String.valueOf(offset + 1))
+                    .build();
+
+            String ret = get(url);
+
+            Result result = GSON.fromJson(ret, Result.class);
+
+            if (result.isOk()) {
+
+                List<Update> updates = result.getUpdates();
+
+                /**
+                 * Se houver mensagens.
+                 */
+                if (!updates.isEmpty()) {
+
+//                    System.out.println("");
+//                    System.out.println(ret);
+//                    System.out.println("");
+                    for (Update update : updates) {
+                        LOG.msg(update.getId(), update.getMessage().getText());
+                    }
+
+                    pair.setValue(String.valueOf(updates.get(updates.size() - 1).getId()));
+
+                    dao.saveOrUpdate(pair);
+                }
+
+                LOG.msg(0, "TelegramBot - " + name);
+            } else {
+                LOG.msg(-1, "TelegramBot - ERRO: " + ret);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+}

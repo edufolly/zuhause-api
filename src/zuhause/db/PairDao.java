@@ -37,7 +37,7 @@ public class PairDao {
 
         try (Connection connection = DbUtil.getConnection(dbConfig)) {
 
-            String query = "INSERT INTO `pairs`"
+            String query = "INSERT INTO `pairs` "
                     + "(`tab`, `key`, `value`) VALUES (?, ?, ?);";
 
             try (PreparedStatement prepareStatement = connection.prepareStatement(query)) {
@@ -48,6 +48,46 @@ public class PairDao {
                 return prepareStatement.execute();
             }
 
+        }
+    }
+
+    /**
+     *
+     * @param pair
+     * @return boolean
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
+    public boolean saveOrUpdate(Pair pair)
+            throws ClassNotFoundException, SQLException {
+
+        try (Connection connection = DbUtil.getConnection(dbConfig)) {
+            if (pair.getId() > 0) {
+                String query = "UPDATE `pairs` "
+                        + "SET `tab` = ?, `key` = ?, `value` = ? "
+                        + "WHERE `id` = ?";
+
+                try (PreparedStatement prepareStatement = connection.prepareStatement(query)) {
+
+                    prepareStatement.setString(1, pair.getTab());
+                    prepareStatement.setString(2, pair.getKey());
+                    prepareStatement.setString(3, pair.getValue());
+                    prepareStatement.setLong(4, pair.getId());
+
+                    return prepareStatement.executeUpdate() > 0;
+                }
+            } else {
+                String query = "INSERT INTO `pairs` "
+                        + "(`tab`, `key`, `value`) VALUES (?, ?, ?);";
+
+                try (PreparedStatement prepareStatement = connection.prepareStatement(query)) {
+                    prepareStatement.setString(1, pair.getTab());
+                    prepareStatement.setString(2, pair.getKey());
+                    prepareStatement.setString(3, pair.getValue());
+
+                    return prepareStatement.execute();
+                }
+            }
         }
     }
 

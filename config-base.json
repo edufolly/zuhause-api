@@ -26,5 +26,13 @@
             "password": "123456",
             "internalType": "zuhause.router.intelbras.WRN240"
         }
+    },
+    "telegramBotConfigs": {
+        "my_name_bot": {
+            "scheme": "https",
+            "host": "api.telegram.org",
+            "token": "123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi",
+            "name": "my_name_bot"
+        }
     }
 }

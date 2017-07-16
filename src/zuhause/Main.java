@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import zuhause.bot.TelegramBot;
 
 /**
  *
@@ -14,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Main {
 
-    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(2);
+    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(3);
 
     /**
      *
@@ -39,6 +40,9 @@ public class Main {
 
             SCHEDULER.scheduleAtFixedRate(new RouterScheduler(),
                     0, 1, TimeUnit.MINUTES);
+
+            SCHEDULER.scheduleWithFixedDelay(Config.getTelegramBot("zuhause_iot_bot"),
+                    10, 62, TimeUnit.SECONDS);
 */
             ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
             serverlog.msg(0, "Start");

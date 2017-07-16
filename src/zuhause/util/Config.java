@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.Map;
+import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.router.Router;
 import zuhause.serial.Serial;
@@ -22,6 +23,7 @@ public class Config {
     private Map<String, DbConfig> dbConfigs;
     private Map<String, Serial> serialConfigs;
     private Map<String, Router> routerConfigs;
+    private Map<String, TelegramBot> telegramBotConfigs;
 
     private static transient Config INSTANCE = null;
 
@@ -52,16 +54,41 @@ public class Config {
         return INSTANCE;
     }
 
+    /**
+     *
+     * @param config
+     * @return
+     */
     public static DbConfig getDbConfig(String config) {
         return Config.getInstance().getDbConfigs().get(config);
     }
 
+    /**
+     *
+     * @param serial
+     * @return
+     */
     public static Serial getSerial(String serial) {
         return Config.getInstance().getSerialConfigs().get(serial);
     }
 
+    /**
+     *
+     * @param router
+     * @return Router
+     * @throws Exception
+     */
     public static Router getRouter(String router) throws Exception {
         return Config.getInstance().getRouterConfigs().get(router).parse();
+    }
+
+    /**
+     *
+     * @param bot
+     * @return
+     */
+    public static TelegramBot getTelegramBot(String bot) {
+        return Config.getInstance().getTelegramBotConfigs().get(bot);
     }
 
     /**
@@ -164,6 +191,22 @@ public class Config {
      */
     public void setRouterConfigs(Map<String, Router> routerConfigs) {
         this.routerConfigs = routerConfigs;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Map<String, TelegramBot> getTelegramBotConfigs() {
+        return telegramBotConfigs;
+    }
+
+    /**
+     *
+     * @param telegramBotConfigs
+     */
+    public void setTelegramBotConfigs(Map<String, TelegramBot> telegramBotConfigs) {
+        this.telegramBotConfigs = telegramBotConfigs;
     }
 
 }

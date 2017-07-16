@@ -181,4 +181,25 @@ public class Router implements Serializable {
     public List<Rule> ruleCreate(String mac) throws Exception {
         return null;
     }
+
+    /**
+     *
+     * @param idRule
+     * @return JSON
+     * @throws Exception
+     */
+    public List<Rule> rulePause(int idRule) throws Exception {
+        return null;
+    }
+
+    /**
+     *
+     * @param idRule
+     * @return JSON
+     * @throws Exception
+     */
+    public List<Rule> rulePlay(int idRule) throws Exception {
+        return null;
+    }
+
 }

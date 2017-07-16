@@ -403,4 +403,89 @@ public class WRN240 extends Router {
         return rules;
     }
 
+    @Override
+    public List<Rule> ruleCreate(String mac) throws Exception {
+
+        // TODO - Validar mac
+        mac = mac.toUpperCase();
+
+        List<String> hosts = hostList();
+
+        List<Rule> rules;
+
+        if (!hosts.contains(mac)) {
+            hosts = hostCreate(mac);
+        }
+
+        if (hosts.contains(mac)) {
+
+            int idHost = hosts.indexOf(mac);
+
+            HttpUrl url = new HttpUrl.Builder()
+                    .scheme("http")
+                    .host(getHost())
+                    .addPathSegments("userRpm/AccessCtrlAccessRulesRpm.htm")
+                    .addQueryParameter("rule_name", mac)
+                    .addQueryParameter("hosts_lists", String.valueOf(idHost))
+                    .addQueryParameter("targets_lists", "255")
+                    .addQueryParameter("scheds_lists", "255")
+                    .addQueryParameter("enable", "0")
+                    .addQueryParameter("Changed", "0")
+                    .addQueryParameter("SelIndex", "0")
+                    .addQueryParameter("Page", "1")
+                    .addQueryParameter("Save", "Salvar")
+                    .build();
+
+            rules = ruleProc(get(url));
+
+        } else {
+            throw new Exception("Não foi possível criar o host.");
+        }
+
+        return rules;
+    }
+
+    /**
+     *
+     * @param idRule
+     * @return JSON
+     * @throws Exception
+     */
+    @Override
+    public List<Rule> rulePause(int idRule) throws Exception {
+        return ruleSet(idRule, 1);
+    }
+
+    /**
+     *
+     * @param idRule
+     * @return JSON
+     * @throws Exception
+     */
+    @Override
+    public List<Rule> rulePlay(int idRule) throws Exception {
+        return ruleSet(idRule, 0);
+    }
+
+    /**
+     *
+     * @param idRule
+     * @param enable
+     * @return JSON
+     * @throws Exception
+     */
+    public List<Rule> ruleSet(int idRule, int enable) throws Exception {
+
+        HttpUrl url = new HttpUrl.Builder()
+                .scheme("http")
+                .host(getHost())
+                .addPathSegments("userRpm/AccessCtrlAccessRulesRpm.htm")
+                .addQueryParameter("enable", String.valueOf(enable))
+                .addQueryParameter("enableId", String.valueOf(idRule))
+                .addQueryParameter("Page", "1")
+                .build();
+
+        return ruleProc(get(url));
+    }
+
 }
