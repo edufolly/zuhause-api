@@ -4,7 +4,6 @@ import com.google.common.base.CharMatcher;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,40 +22,44 @@ public class ApiRaspiStats {
 
     /**
      *
-     * @return @throws IOException
+     * @return JSON
+     * @throws IOException
      * @throws InterruptedException
      */
     @Path("/disk")
     @GET
-    public List<Map<String, String>> DiskGET() throws IOException, InterruptedException {
+    public List<Map<String, Object>> DiskGET() throws IOException, InterruptedException {
         return TerminalHelper.execute("df");
     }
 
     /**
      *
-     * @return @throws IOException
+     * @return JSON
+     * @throws IOException
      * @throws InterruptedException
      */
     @Path("/ram")
     @GET
-    public List<Map<String, String>> RamGET() throws IOException, InterruptedException {
+    public List<Map<String, Object>> RamGET() throws IOException, InterruptedException {
         return TerminalHelper.execute("free -o");
     }
 
     /**
      *
-     * @return @throws IOException
+     * @return JSON
+     * @throws IOException
      * @throws InterruptedException
      */
     @Path("/top")
     @GET
-    public List<Map<String, String>> TopGET() throws IOException, InterruptedException {
+    public List<Map<String, Object>> TopGET() throws IOException, InterruptedException {
         return TerminalHelper.execute("top -bn1w1024", 6);
     }
 
     /**
      *
-     * @return @throws IOException
+     * @return JSON
+     * @throws IOException
      */
     @Path("/temp")
     @GET
@@ -77,7 +80,8 @@ public class ApiRaspiStats {
 
     /**
      *
-     * @return @throws IOException
+     * @return JSON
+     * @throws IOException
      */
     @Path("/volts")
     @GET
@@ -100,15 +104,16 @@ public class ApiRaspiStats {
 
     /**
      *
-     * @return @throws IOException
+     * @return JSON
+     * @throws IOException
      * @throws ParseException
      */
     @Path("/uptime")
     @GET
-    public Map<String, String> UptimeGET() throws IOException, ParseException {
+    public Map<String, Object> UptimeGET() throws IOException, ParseException {
         String since = TerminalHelper.rawExecute("uptime -s").trim();
 
-        Map<String, String> mapa = new HashMap();
+        Map<String, Object> mapa = new HashMap();
 
         mapa.put("since", since);
 
@@ -123,22 +128,28 @@ public class ApiRaspiStats {
 
     /**
      *
-     * @return @throws IOException
+     * @return JSON
+     * @throws IOException
      * @throws java.lang.InterruptedException
      */
     @Path("/proc")
     @GET
-    public List<Map<String, String>> ProcGET() throws IOException, InterruptedException {
+    public List<Map<String, Object>> ProcGET() throws IOException, InterruptedException {
         // sudo apt-get install sysstat
         return TerminalHelper.execute("mpstat -P ON", 2);
     }
 
+    /**
+     *
+     * @return JSON
+     * @throws IOException
+     */
     @Path("/arp")
     @GET
-    public Map<String, String> getArp() throws IOException {
+    public Map<String, Object> getArp() throws IOException {
         // sudo apt-get install arp-scan
 
-        Map<String, String> mapa = new HashMap();
+        Map<String, Object> mapa = new HashMap();
 
         String as = TerminalHelper.rawExecute("sudo arp-scan -l -g -q");
 

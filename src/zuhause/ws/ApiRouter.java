@@ -1,8 +1,12 @@
 package zuhause.ws;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import zuhause.annotations.GET;
 import zuhause.annotations.Path;
 import zuhause.annotations.PathParam;
@@ -11,6 +15,7 @@ import zuhause.db.Pair;
 import zuhause.db.PairDao;
 import zuhause.router.DhcpClient;
 import zuhause.router.Router;
+import zuhause.router.Rule;
 import zuhause.util.Config;
 
 /**
@@ -24,9 +29,10 @@ public class ApiRouter {
             .getDbConfigs().get("localhost");
 
     /**
-     * 
+     *
      */
     class RouterConfig {
+
         public String ip;
         public String mac;
         public String name;
@@ -35,11 +41,12 @@ public class ApiRouter {
 
     /**
      *
-     * @return @throws Exception
+     * @return JSON
+     * @throws Exception
      */
     @Path("/full_config")
     @GET
-    public Map<String, RouterConfig> getFullConfig() throws Exception {
+    public List<RouterConfig> getFullConfig() throws Exception {
 
         PairDao dao = new PairDao(DB_CONFIG);
 
@@ -83,7 +90,7 @@ public class ApiRouter {
         /**
          * Verificação ARP no Raspi.
          */
-        Map<String, String> arp = new ApiRaspiStats().getArp();
+        Map<String, Object> arp = new ApiRaspiStats().getArp();
 
         /**
          * Verificação ARP no roteador.
@@ -93,13 +100,13 @@ public class ApiRouter {
         for (String mac : arp.keySet()) {
             if (lista.containsKey(mac)) {
                 RouterConfig rc = lista.get(mac);
-                rc.ip = arp.get(mac);
+                rc.ip = arp.get(mac).toString();
                 rc.online = true;
             } else {
                 RouterConfig rc = new RouterConfig();
                 rc.name = "?";
                 rc.mac = mac;
-                rc.ip = arp.get(mac);
+                rc.ip = arp.get(mac).toString();
                 rc.online = true;
 
                 dao.Insert("resolve_mac", rc.mac, rc.name);
@@ -111,7 +118,7 @@ public class ApiRouter {
         /**
          * Conectados no roteador.
          */
-        List<String> macs = router.getConnected();
+        Set<String> macs = router.getConnected();
 
         for (String mac : macs) {
             if (lista.containsKey(mac)) {
@@ -119,8 +126,42 @@ public class ApiRouter {
                 rc.online = true;
             }
         }
+        List<RouterConfig> retorno = new ArrayList<>(lista.values());
 
-        return lista;
+        Collections.sort(retorno, new Comparator<RouterConfig>() {
+            @Override
+            public int compare(RouterConfig o1, RouterConfig o2) {
+                if (o1.ip == null && o2.ip == null) {
+                    return (o1.online + o1.mac).compareTo(o2.online + o2.mac);
+                }
+
+                if (o1.ip == null && o2.ip != null) {
+                    return 1;
+                }
+
+                if (o1.ip != null && o2.ip == null) {
+                    return -1;
+                }
+
+                String[] ip1 = o1.ip.split("\\.");
+                Long i1 = o1.online ? 0 : 10000000000l;
+                i1 += Long.parseLong(ip1[0]) * 1000000000l + 1000000000l;
+                i1 += Long.parseLong(ip1[1]) * 1000000l + 1000000l;
+                i1 += Long.parseLong(ip1[2]) * 1000l + 100l;
+                i1 += Long.parseLong(ip1[3]) + 1l;
+
+                String[] ip2 = o2.ip.split("\\.");
+                Long i2 = o2.online ? 0 : 10000000000l;
+                i2 += Long.parseLong(ip2[0]) * 1000000000l + 1000000000l;
+                i2 += Long.parseLong(ip2[1]) * 1000000l + 1000000l;
+                i2 += Long.parseLong(ip2[2]) * 1000l + 100l;
+                i2 += Long.parseLong(ip2[3]) + 1l;
+
+                return i1.compareTo(i2);
+            }
+        });
+
+        return retorno;
     }
 
     /**
@@ -136,35 +177,59 @@ public class ApiRouter {
 
     /**
      *
-     * @return @throws Exception
+     * @return JSON
+     * @throws Exception
      */
     @Path("/arp/list")
     @GET
-    public Map<String, String> getArpList() throws Exception {
+    public Map<String, Object> getArpList() throws Exception {
         return Config.getRouter("WRN240").arpList();
     }
 
     /**
      *
-     * @return Lista de mac address conectados.
+     * @return JSON
      * @throws Exception
      */
     @Path("/connected")
     @GET
-    public List<String> getConnected() throws Exception {
+    public Set<String> getConnected() throws Exception {
         return Config.getRouter("WRN240").getConnected();
     }
 
     /**
      *
-     * @param mac
-     * @return
+     * @return JSON
      * @throws Exception
      */
-    @Path("/device/pause/:mac")
+    @Path("/host/list")
+    @GET
+    public List<String> getHostList() throws Exception {
+        return Config.getRouter("WRN240").hostList();
+    }
+
+    /**
+     *
+     * @param mac
+     * @return JSON
+     * @throws Exception
+     */
+    @Path("/host/create/:mac")
     @GET
     @PathParam({"mac"})
-    public Map<String, Boolean> getDevicePause(String mac) throws Exception {
-        return Config.getRouter("WRN240").devicePause(mac);
+    public List<String> getHostCreate(String mac) throws Exception {
+        return Config.getRouter("WRN240").hostCreate(mac);
     }
+
+    /**
+     *
+     * @return JSON
+     * @throws Exception
+     */
+    @Path("/rule/list")
+    @GET
+    public List<Rule> getRuleList() throws Exception {
+        return Config.getRouter("WRN240").ruleList();
+    }
+
 }

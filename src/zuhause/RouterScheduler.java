@@ -1,6 +1,7 @@
 package zuhause;
 
 import java.util.List;
+import java.util.Set;
 import zuhause.db.DbConfig;
 import zuhause.db.Pair;
 import zuhause.db.PairDao;
@@ -27,7 +28,7 @@ public class RouterScheduler implements Runnable {
             if (!pairs.isEmpty()) {
                 ApiRouter router = new ApiRouter();
 
-                List<String> macs = router.getConnected();
+                Set<String> macs = router.getConnected();
 
                 for (Pair pair : pairs) {
 

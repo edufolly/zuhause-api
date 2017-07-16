@@ -3,6 +3,7 @@ package zuhause.router;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -95,11 +96,15 @@ public class Router implements Serializable {
 
     /**
      *
-     * @return @throws ClassNotFoundException
+     * @return Router
+     * @throws ClassNotFoundException
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public Router parse() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public Router parse()
+            throws ClassNotFoundException, InstantiationException,
+            IllegalAccessException {
+
         Class<?> clazz = Class.forName(this.internalType);
 
         Router newRouter = (Router) clazz.newInstance();
@@ -114,7 +119,8 @@ public class Router implements Serializable {
 
     /**
      *
-     * @return @throws Exception
+     * @return JSON
+     * @throws Exception
      */
     public List<DhcpClient> dhcpList() throws Exception {
         return null;
@@ -122,37 +128,57 @@ public class Router implements Serializable {
 
     /**
      *
-     * @return @throws Exception
+     * @return JSON
+     * @throws Exception
      */
-    public Map<String, String> arpList() throws Exception {
+    public Map<String, Object> arpList() throws Exception {
         return null;
     }
 
     /**
      *
-     * @return @throws Exception
+     * @return JSON
+     * @throws Exception
      */
-    public List<String> getConnected() throws Exception {
+    public Set<String> getConnected() throws Exception {
+        return null;
+    }
+
+    /**
+     *
+     * @return JSON
+     * @throws Exception
+     */
+    public List<String> hostList() throws Exception {
         return null;
     }
 
     /**
      *
      * @param mac
-     * @return
+     * @return JSON
      * @throws Exception
      */
-    public Map<String, Boolean> devicePause(String mac) throws Exception {
+    public List<String> hostCreate(String mac) throws Exception {
+        return null;
+    }
+
+    /**
+     *
+     * @return JSON
+     * @throws Exception
+     */
+    public List<Rule> ruleList() throws Exception {
         return null;
     }
 
     /**
      *
      * @param mac
-     * @return
+     * @return JSON
      * @throws Exception
      */
-    public Map<String, Boolean> devicePlay(String mac) throws Exception {
+    public List<Rule> ruleCreate(String mac) throws Exception {
         return null;
     }
 }

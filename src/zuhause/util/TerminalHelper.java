@@ -15,7 +15,6 @@ import java.util.Map;
 public class TerminalHelper {
 
     // TODO - Existe um bug quando o comando retorna somente 2 linhas.
-    
     /**
      *
      * @param command
@@ -45,7 +44,7 @@ public class TerminalHelper {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static List<Map<String, String>> execute(String command)
+    public static List<Map<String, Object>> execute(String command)
             throws IOException, InterruptedException {
 
         return execute(command, 0);
@@ -59,7 +58,7 @@ public class TerminalHelper {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static List<Map<String, String>> execute(String command, int startLine)
+    public static List<Map<String, Object>> execute(String command, int startLine)
             throws IOException, InterruptedException {
 
         Runtime rt = Runtime.getRuntime();
@@ -82,7 +81,7 @@ public class TerminalHelper {
 
         List<Triple> headers = getTriples(lns);
 
-        List<Map<String, String>> objects = getObjects(headers, lns, 1);
+        List<Map<String, Object>> objects = getObjects(headers, lns, 1);
 
         return objects;
     }
@@ -138,12 +137,12 @@ public class TerminalHelper {
      * @param startLine
      * @return
      */
-    private static List<Map<String, String>> getObjects(List<Triple> header, String[] lines, int startLine) {
-        List<Map<String, String>> objects = new ArrayList();
+    private static List<Map<String, Object>> getObjects(List<Triple> header, String[] lines, int startLine) {
+        List<Map<String, Object>> objects = new ArrayList();
 
         for (int i = startLine; i < lines.length - 1; i++) {
             String l = lines[i];
-            Map<String, String> object = new HashMap();
+            Map<String, Object> object = new HashMap();
             for (Triple triple : header) {
                 String value = l.substring(triple.begin, triple.end == -1 || triple.end > l.length() ? l.length() : triple.end).trim();
                 object.put(triple.key, value);
@@ -161,7 +160,7 @@ public class TerminalHelper {
      * @param key2
      * @return
      */
-    private static List<Map<String, String>> mergeMap(List<Map<String, String>> list1, String key1, List<Map<String, String>> list2, String key2) {
+    private static List<Map<String, Object>> mergeMap(List<Map<String, Object>> list1, String key1, List<Map<String, Object>> list2, String key2) {
 
         for (Map object1 : list1) {
 
