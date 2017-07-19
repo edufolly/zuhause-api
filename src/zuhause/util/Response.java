@@ -1,5 +1,6 @@
 package zuhause.util;
 
+import com.google.common.net.HttpHeaders;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -15,42 +16,104 @@ public class Response {
     //--
     private String protocol = "HTTP/1.1";
     private String httpStatus = HttpStatus.SC_OK;
-    private Map<String, String> headers = new HashMap();
+    private final Map<String, String> headers = new HashMap();
     private StringBuilder body = new StringBuilder();
     private final OutputStream outToClient;
 
+    /**
+     *
+     * @param outToClient
+     */
     public Response(OutputStream outToClient) {
         this.outToClient = outToClient;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getProtocol() {
         return protocol;
     }
 
-    public void setProtocol(String protocol) {
+    /**
+     *
+     * @param protocol
+     * @return
+     */
+    public Response setProtocol(String protocol) {
         this.protocol = protocol;
+        return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getHttpStatus() {
         return httpStatus;
     }
 
-    public void setHttpStatus(String httpStatus) {
+    /**
+     *
+     * @param httpStatus
+     * @return
+     */
+    public Response setHttpStatus(String httpStatus) {
         this.httpStatus = httpStatus;
+        return this;
     }
 
-    public void append(String string) {
-        body.append(string);
+    /**
+     * 
+     * @param body
+     * @return 
+     */
+    public Response setBody(String body) {
+        this.body = new StringBuilder(body);
+        return this;
+    }
+    
+    /**
+     *
+     * @param string
+     * @return
+     */
+    public Response append(String string) {
+        this.body.append(string);
+        return this;
     }
 
-    public void setBody(String string) {
-        body = new StringBuilder(string);
+    /**
+     *
+     * @return
+     */
+    public Response clearBody() {
+        body = new StringBuilder();
+        return this;
     }
 
+    /**
+     *
+     * @param key
+     * @param value
+     * @return
+     */
     public String addHeader(String key, String value) {
         return headers.put(key, value);
     }
 
+    /**
+     *
+     */
+    public void clearHeaders() {
+        headers.clear();
+    }
+
+    /**
+     *
+     * @throws IOException
+     */
     public void flush() throws IOException {
 
         if (!body.toString().isEmpty()) {

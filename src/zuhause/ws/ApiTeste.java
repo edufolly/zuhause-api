@@ -1,7 +1,9 @@
 package zuhause.ws;
 
 import zuhause.annotations.GET;
+import zuhause.annotations.MediaTypeEnum;
 import zuhause.annotations.Path;
+import zuhause.annotations.ReturnType;
 
 /**
  *
@@ -11,6 +13,7 @@ import zuhause.annotations.Path;
 public class ApiTeste {
 
     @GET
+    @ReturnType(MediaTypeEnum.TEXT)
     public String TesteGET() {
         return "Teste OK!!";
     }
@@ -26,7 +29,6 @@ public class ApiTeste {
 //
 //        return arduino.waitFor("#");
 //    }
-
     /**
      *
      * @param unidade

@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import zuhause.bot.TelegramBot;
 
 /**
  *
@@ -15,7 +14,7 @@ import zuhause.bot.TelegramBot;
  */
 public class Main {
 
-    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(3);
+    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(4);
 
     /**
      *
@@ -33,7 +32,7 @@ public class Main {
             porta = config.getTcpPort();
 
             EndpointCache.init();
-/*
+            /*
             // TODO - Implementar configurável.
             SCHEDULER.scheduleAtFixedRate(new TempScheduler(),
                     0, 5, TimeUnit.MINUTES);
@@ -42,14 +41,19 @@ public class Main {
                     0, 1, TimeUnit.MINUTES);
 
             SCHEDULER.scheduleWithFixedDelay(Config.getTelegramBot("zuhause_iot_bot"),
-                    10, 62, TimeUnit.SECONDS);
-*/
+                    10, 32, TimeUnit.SECONDS);
+
+            SCHEDULER.scheduleWithFixedDelay(new RouterFullScheduler(),
+                    1, 10, TimeUnit.MINUTES);
+             */
             ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
             serverlog.msg(0, "Start");
             serverlog.msg(0, "Start");
             serverlog.msg(0, "Start");
             serverlog.msg(0, "API Server aguardando conexões na porta " + porta + ".");
 
+//            Config.getTelegramBot("zuhause_iot_bot").sendMessage("Zuhause iniciada.");
+            
             while (true) {
                 Socket connection = server.accept();
                 (new ApiServer(connection)).start();

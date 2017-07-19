@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -13,6 +14,7 @@ import zuhause.db.Pair;
 import zuhause.db.PairDao;
 import zuhause.util.Config;
 import zuhause.util.ServerLog;
+import zuhause.ws.ApiArduino;
 
 /**
  *
@@ -147,6 +149,11 @@ public class TelegramBot implements Serializable, Runnable {
 //                    System.out.println("");
                     for (Update update : updates) {
                         LOG.msg(update.getId(), update.getMessage().getText());
+
+                        if (update.getMessage().getText().equalsIgnoreCase("temperatura")) {
+                            Map<String, Object> temp = new ApiArduino().getTempInterna();
+                            sendMessage("Temperatura atual: " + temp.get("t") + "ºC");
+                        }
                     }
 
                     pair.setValue(String.valueOf(updates.get(updates.size() - 1).getId()));

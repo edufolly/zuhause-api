@@ -1,5 +1,8 @@
 package zuhause;
 
+import com.google.common.base.Strings;
+import com.google.common.net.HttpHeaders;
+import com.google.common.net.MediaType;
 import zuhause.annotations.BodyParam;
 import zuhause.annotations.PathParam;
 import zuhause.annotations.QueryStringParam;
@@ -16,14 +19,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import zuhause.annotations.ReturnType;
+import zuhause.util.HttpStatus;
+import zuhause.util.Response;
 
 /**
  *
- * @author edufolly
+ * @author Eduardo Folly
  */
 public class Invokable {
 
-    private static final transient Pattern patternParam = Pattern.compile(":([^/]+?)/");
+    private static final transient Pattern PATTERN_PARAM = Pattern.compile(":([^/]+?)/");
+    private static final transient Gson GSON = new Gson();
+
     //--
     private final Class clazz;
     private final Method method;
@@ -42,7 +50,7 @@ public class Invokable {
         this.method = method;
         this.pattern = pattern;
 
-        Matcher matcher = patternParam.matcher(endpoint);
+        Matcher matcher = PATTERN_PARAM.matcher(endpoint);
         List<String> p = new ArrayList();
         while (matcher.find()) {
             p.add(matcher.group(1));
@@ -72,13 +80,12 @@ public class Invokable {
     /**
      *
      * @param request
+     * @param response
      * @return
      * @throws InvokableException
      */
-    public String invoke(Request request) throws InvokableException {
+    public Response invoke(Request request, Response response) throws InvokableException {
         try {
-            Gson gson = new Gson();
-
             Map<String, String> map = new HashMap();
 
             Matcher matcher = pattern.matcher(request.getHttpMethod() + " "
@@ -96,8 +103,13 @@ public class Invokable {
 
             int i = 0;
 
+            MediaType mediaType = null;
+
+            String body = null;
+
             for (Annotation annotation : method.getAnnotations()) {
-                if (annotation.annotationType().equals(PathParam.class)) {
+                Class<? extends Annotation> annotationType = annotation.annotationType();
+                if (annotationType.equals(PathParam.class)) {
                     for (String key : ((PathParam) annotation).value()) {
                         if (map.containsKey(key)) {
                             objects[i] = cast(parameterTypes[i], map.get(key));
@@ -106,7 +118,7 @@ public class Invokable {
                         }
                         i++;
                     }
-                } else if (annotation.annotationType().equals(QueryStringParam.class)) {
+                } else if (annotationType.equals(QueryStringParam.class)) {
                     for (String key : ((QueryStringParam) annotation).value()) {
                         if (request.containsQueryString(key)) {
                             objects[i] = cast(parameterTypes[i], request.getQueryString(key));
@@ -115,21 +127,57 @@ public class Invokable {
                         }
                         i++;
                     }
-                } else if (annotation.annotationType().equals(BodyParam.class)) {
-                    objects[i] = gson.fromJson(String.valueOf(request.getBody()).trim(), parameterTypes[i]);
+                } else if (annotationType.equals(BodyParam.class)) {
+                    objects[i] = GSON.fromJson(String.valueOf(request.getBody()).trim(), parameterTypes[i]);
                     i++;
+                } else if (annotationType.equals(ReturnType.class)) {
+                    mediaType = ((ReturnType) annotation).value().mediaType;
                 }
             }
 
             Object invoked = method.invoke(clazz.newInstance(), objects);
 
-            return gson.toJson(invoked);
+            if (mediaType == null) {
+                mediaType = MediaType.JSON_UTF_8;
+            }
+
+            if (mediaType == MediaType.JSON_UTF_8) {
+                response.addHeader(HttpHeaders.CONTENT_TYPE,
+                        MediaType.JSON_UTF_8.toString());
+
+                response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+                        "*");
+
+                response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
+                        "origin, content-type, accept, authorization");
+
+                response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS,
+                        "true");
+
+                response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
+                        "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+
+                body = GSON.toJson(invoked);
+            } else {
+                response.addHeader(HttpHeaders.CONTENT_TYPE, mediaType.toString());
+
+                body = invoked.toString();
+            }
+
+            if (Strings.isNullOrEmpty(body)) {
+                response.clearHeaders();
+                response.setHttpStatus(HttpStatus.SC_NO_CONTENT);
+            } else {
+                response.setHttpStatus(HttpStatus.SC_OK);
+                response.setBody(body);
+            }
         } catch (InvocationTargetException e) {
             throw new InvokableException(e.getTargetException().getMessage(), e);
         } catch (Exception ex) {
             throw new InvokableException(ex.getMessage(), ex);
         }
 
+        return response;
     }
 
     /**

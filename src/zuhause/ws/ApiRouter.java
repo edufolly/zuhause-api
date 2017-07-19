@@ -10,6 +10,7 @@ import java.util.Set;
 import zuhause.annotations.GET;
 import zuhause.annotations.Path;
 import zuhause.annotations.PathParam;
+import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.db.Pair;
 import zuhause.db.PairDao;
@@ -25,8 +26,8 @@ import zuhause.util.Config;
 @Path("/api/router")
 public class ApiRouter {
 
-    private static final DbConfig DB_CONFIG = Config.getInstance()
-            .getDbConfigs().get("localhost");
+    private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
+    private static final TelegramBot BOT = Config.getTelegramBot("zuhause_iot_bot");
 
     /**
      *
@@ -40,6 +41,11 @@ public class ApiRouter {
         public int idHost = -1;
         public int idRule = -1;
         public boolean paused = false;
+
+        @Override
+        public String toString() {
+            return "{" + "ip " + ip + ", mac " + mac + ", name " + name + "}";
+        }
     }
 
     /**
@@ -85,7 +91,7 @@ public class ApiRouter {
                 rc.ip = client.getIp();
 
                 dao.Insert("resolve_mac", rc.mac, rc.name);
-
+                BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
                 lista.put(rc.mac, rc);
             }
         }
@@ -113,7 +119,7 @@ public class ApiRouter {
                 rc.online = true;
 
                 dao.Insert("resolve_mac", rc.mac, rc.name);
-
+                BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
                 lista.put(rc.mac, rc);
             }
         }
@@ -134,7 +140,7 @@ public class ApiRouter {
                 rc.online = true;
 
                 dao.Insert("resolve_mac", rc.mac, rc.name);
-
+                BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
                 lista.put(rc.mac, rc);
             }
         }
@@ -155,11 +161,10 @@ public class ApiRouter {
          * Regras cadastradas no roteador.
          */
         List<Rule> rules = getRuleList();
-        for (int i = 0; i < rules.size(); i++) {
-            Rule rule = rules.get(i);
+        for (Rule rule : rules) {
             if (lista.containsKey(rule.getHost())) {
                 RouterConfig rc = lista.get(rule.getHost());
-                rc.idRule = i;
+                rc.idRule = rule.getId();
                 if (rule.getStatus() == 1) {
                     rc.paused = true;
                 }

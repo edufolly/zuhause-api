@@ -1,13 +1,14 @@
 package zuhause;
 
+import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
-import zuhause.util.HttpHeaders;
 import zuhause.util.HttpStatus;
 import zuhause.util.ServerLog;
 import zuhause.util.Request;
@@ -64,27 +65,8 @@ public class ApiServer extends Thread {
                         + " - Path: " + request.getPath());
             }
 
-            String body = invokable.invoke(request);
+            response = invokable.invoke(request, response);
 
-            if (body == null) {
-                response.setHttpStatus(HttpStatus.SC_NO_CONTENT);
-            } else {
-                response.setHttpStatus(HttpStatus.SC_OK);
-                response.setBody(body);
-            }
-
-            response.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-
-            response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-
-            response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
-                    "origin, content-type, accept, authorization");
-
-            response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS,
-                    "true");
-
-            response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
-                    "GET, POST, PUT, DELETE, OPTIONS, HEAD");
         } catch (Exception ex) {
             serverlog.erro(this.hashCode(), ex);
             try {
@@ -93,15 +75,18 @@ public class ApiServer extends Thread {
                 PrintWriter pw = new PrintWriter(sw);
                 ex.printStackTrace(pw);
                 Erro erro = new Erro(ex.getMessage(), sw.toString());
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 response.setBody(gson.toJson(erro));
             } catch (Exception exx) {
+                exx.printStackTrace();
             }
         } finally {
             try {
                 response.addHeader(HttpHeaders.SERVER, "Zuhause API Server");
+                response.addHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
                 response.flush();
             } catch (Exception exx) {
+                exx.printStackTrace();
             }
             serverlog.desconectado(this.hashCode());
         }

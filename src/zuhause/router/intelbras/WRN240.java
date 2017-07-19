@@ -2,6 +2,8 @@ package zuhause.router.intelbras;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -333,9 +335,10 @@ public class WRN240 extends Router {
                 .scheme("http")
                 .host(getHost())
                 .addPathSegments("userRpm/AccessCtrlAccessRulesRpm.htm")
+                .addQueryParameter("Page", "1")
                 .build();
 
-        return ruleProc(get(url));
+        return ruleProc(get(url), 1);
     }
 
     /**
@@ -344,7 +347,7 @@ public class WRN240 extends Router {
      * @return Lista de regras
      * @throws Exception
      */
-    private List<Rule> ruleProc(String html) throws Exception {
+    private List<Rule> ruleProc(String html, int pag) throws Exception {
 
         int pages;
 
@@ -356,18 +359,27 @@ public class WRN240 extends Router {
 
         pages = (int) Math.ceil(total / 8.0);
 
-        rules.addAll(ruleProcPage(html));
+        rules.addAll(ruleProcPage(html, pag));
 
-        for (int page = 2; page <= pages; page++) {
-            HttpUrl url = new HttpUrl.Builder()
-                    .scheme("http")
-                    .host(getHost())
-                    .addPathSegments("userRpm/AccessCtrlAccessRulesRpm.htm")
-                    .addQueryParameter("Page", String.valueOf(page))
-                    .build();
+        for (int page = 1; page <= pages; page++) {
+            if (page != pag) {
+                HttpUrl url = new HttpUrl.Builder()
+                        .scheme("http")
+                        .host(getHost())
+                        .addPathSegments("userRpm/AccessCtrlAccessRulesRpm.htm")
+                        .addQueryParameter("Page", String.valueOf(page))
+                        .build();
 
-            rules.addAll(ruleProcPage(get(url)));
+                rules.addAll(ruleProcPage(get(url), page));
+            }
         }
+
+        Collections.sort(rules, new Comparator<Rule>() {
+            @Override
+            public int compare(Rule o1, Rule o2) {
+                return o1.getId() - o2.getId();
+            }
+        });
 
         return rules;
     }
@@ -377,7 +389,7 @@ public class WRN240 extends Router {
      * @param html
      * @return
      */
-    private List<Rule> ruleProcPage(String html) throws Exception {
+    private List<Rule> ruleProcPage(String html, int page) throws Exception {
         List<Rule> rules = new ArrayList();
 
         ScriptObjectMirror scriptObj = scriptArray(html, "access_rules_data_param");
@@ -387,15 +399,16 @@ public class WRN240 extends Router {
         for (int i = 0; i < total; i++) {
             int j = 8 * i;
 
-            Rule rule = new Rule();
-            rule.setName(scriptObj.get(String.valueOf(j)).toString());
-            rule.setIdHost(Integer.parseInt(scriptObj.get(String.valueOf(j + 1)).toString()));
-            rule.setIdDestination(Integer.parseInt(scriptObj.get(String.valueOf(j + 2)).toString()));
-            rule.setIdSchedule(Integer.parseInt(scriptObj.get(String.valueOf(j + 3)).toString()));
-            rule.setHost(scriptObj.get(String.valueOf(j + 4)).toString());
-            rule.setDestination(scriptObj.get(String.valueOf(j + 5)).toString());
-            rule.setSchedule(scriptObj.get(String.valueOf(j + 6)).toString());
-            rule.setStatus(Integer.parseInt(scriptObj.get(String.valueOf(j + 7)).toString()));
+            Rule rule = new Rule()
+                    .setId((page - 1) * 8 + i)
+                    .setName(scriptObj.get(String.valueOf(j)).toString())
+                    .setIdHost(Integer.parseInt(scriptObj.get(String.valueOf(j + 1)).toString()))
+                    .setIdDestination(Integer.parseInt(scriptObj.get(String.valueOf(j + 2)).toString()))
+                    .setIdSchedule(Integer.parseInt(scriptObj.get(String.valueOf(j + 3)).toString()))
+                    .setHost(scriptObj.get(String.valueOf(j + 4)).toString())
+                    .setDestination(scriptObj.get(String.valueOf(j + 5)).toString())
+                    .setSchedule(scriptObj.get(String.valueOf(j + 6)).toString())
+                    .setStatus(Integer.parseInt(scriptObj.get(String.valueOf(j + 7)).toString()));
 
             rules.add(rule);
         }
@@ -411,8 +424,7 @@ public class WRN240 extends Router {
 
         List<String> hosts = hostList();
 
-        List<Rule> rules;
-
+//        List<Rule> rules;
         if (!hosts.contains(mac)) {
             hosts = hostCreate(mac);
         }
@@ -436,13 +448,11 @@ public class WRN240 extends Router {
                     .addQueryParameter("Save", "Salvar")
                     .build();
 
-            rules = ruleProc(get(url));
+            return ruleProc(get(url), 1);
 
         } else {
             throw new Exception("Não foi possível criar o host.");
         }
-
-        return rules;
     }
 
     /**
@@ -476,16 +486,19 @@ public class WRN240 extends Router {
      */
     public List<Rule> ruleSet(int idRule, int enable) throws Exception {
 
+        int id = idRule % 8;
+        int page = idRule / 8 + 1;
+
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("http")
                 .host(getHost())
                 .addPathSegments("userRpm/AccessCtrlAccessRulesRpm.htm")
                 .addQueryParameter("enable", String.valueOf(enable))
-                .addQueryParameter("enableId", String.valueOf(idRule))
-                .addQueryParameter("Page", "1")
+                .addQueryParameter("enableId", String.valueOf(id))
+                .addQueryParameter("Page", String.valueOf(page))
                 .build();
 
-        return ruleProc(get(url));
+        return ruleProc(get(url), page);
     }
 
 }

@@ -16,15 +16,14 @@ import zuhause.ws.ApiRouter;
  */
 public class RouterScheduler implements Runnable {
 
-    private static final DbConfig DB_CONFIG = Config.getInstance().getDbConfigs().get("localhost");
+    private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
     private static final ServerLog LOG = ServerLog.getInstance();
+    private static final TelegramBot BOT = Config.getTelegramBot("zuhause_iot_bot");
 
     @Override
     public void run() {
         try {
             PairDao dao = new PairDao(DB_CONFIG);
-
-            TelegramBot telegramBot = Config.getTelegramBot("zuhause_iot_bot");
 
             List<Pair> pairs = dao.selectTab("monitora_mac");
 
@@ -54,7 +53,7 @@ public class RouterScheduler implements Runnable {
                     if (save) {
                         ativo = macs.contains(mac);
                         dao.Insert("mac_status", mac, booleanToString(ativo));
-                        telegramBot.sendMessage(pair.getValue()
+                        BOT.sendMessage(pair.getValue()
                                 + (ativo ? " chegou em" : " saiu de") + " casa.");
                     }
                 }
