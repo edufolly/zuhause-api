@@ -17,6 +17,7 @@ import zuhause.serial.Serial;
  */
 public class Config {
 
+    private transient boolean debug;
     private int tcpPort;
     private int maxConnections;
     private String appPackage;
@@ -95,6 +96,22 @@ public class Config {
      *
      */
     private Config() {
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean isDebug() {
+        return debug;
+    }
+
+    /**
+     *
+     * @param debug
+     */
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     /**

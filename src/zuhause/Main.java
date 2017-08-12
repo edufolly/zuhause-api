@@ -29,6 +29,15 @@ public class Main {
         try {
             Config config = Config.getInstance();
 
+            for (String arg : args) {
+                if (arg.equals("--debug")) {
+                    config.setDebug(true);
+                    serverlog.msg(0, "Debug");
+                    serverlog.msg(0, "Debug");
+                    serverlog.msg(0, "Debug");
+                }
+            }
+
             porta = config.getTcpPort();
 
             EndpointCache.init();
@@ -45,15 +54,14 @@ public class Main {
 
             SCHEDULER.scheduleWithFixedDelay(new RouterFullScheduler(),
                     1, 10, TimeUnit.MINUTES);
-             */
+            */
             ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
-            serverlog.msg(0, "Start");
-            serverlog.msg(0, "Start");
-            serverlog.msg(0, "Start");
             serverlog.msg(0, "API Server aguardando conexões na porta " + porta + ".");
 
-//            Config.getTelegramBot("zuhause_iot_bot").sendMessage("Zuhause iniciada.");
-            
+//            if (!config.isDebug()) {
+//                Config.getTelegramBot("zuhause_iot_bot").sendMessage("Zuhause iniciada.");
+//            }
+
             while (true) {
                 Socket connection = server.accept();
                 (new ApiServer(connection)).start();
