@@ -170,13 +170,52 @@ public class ApiRaspiStats {
         return mapa;
     }
 
-    /*
-    @Path("/iftop")
-    @GET
-    public Map<String, String> iftopGET() throws IOException, ParseException {
-        String iftop = TerminalHelper.rawExecute("sudo iftop -t -s 2").trim();
-        System.out.println(iftop);
-        return null;
-    }
+    /**
+     *
+     * @return JSON
+     * @throws IOException
      */
+    @Path("/wireless")
+    @GET
+    public Map<String, Object> iftopGET() throws IOException {
+
+        Map<String, Object> mapa = new HashMap();
+
+        String as = TerminalHelper.rawExecute("/sbin/iwlist wlan0 scan");
+
+        String[] wifi = as.split("\\n");
+
+        String[] key = new String[]{"Address:", "Channel:", "ESSID:\"",
+            "Quality=", "Signal level="};
+
+        for (String line : wifi) {
+            if (line.contains(key[0])) {
+                int start = line.indexOf(key[0]) + key[0].length();
+                mapa.put("mac", line.substring(start).trim());
+            } else if (line.contains(key[1])) {
+                int start = line.indexOf(key[1]) + key[1].length();
+                mapa.put("channel", Integer.parseInt(line.substring(start).trim()));
+            } else if (line.contains(key[2])) {
+                int start = line.indexOf(key[2]) + key[2].length();
+                int end = line.length() - 1;
+                mapa.put("essid", line.substring(start, end).trim());
+            } else if (line.contains(key[3])) {
+                int start = line.indexOf(key[3]) + key[3].length();
+                int end = line.lastIndexOf(" dBm");
+                String[] p = line.substring(start, end).trim().split("  ", 2);
+                mapa.put("quality", p[0]);
+
+                String[] q = p[0].split("/");
+
+                float f = Float.parseFloat(q[0]) / Float.parseFloat(q[1]) * 100f;
+
+                mapa.put("quality_percent", f);
+
+                mapa.put("signal", Integer.parseInt(p[1].substring(key[4].length())));
+            }
+        }
+
+        return mapa;
+    }
+
 }

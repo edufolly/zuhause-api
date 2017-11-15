@@ -58,9 +58,9 @@ public class Main {
             ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
             serverlog.msg(0, "API Server aguardando conexões na porta " + porta + ".");
 
-//            if (!config.isDebug()) {
-//                Config.getTelegramBot("zuhause_iot_bot").sendMessage("Zuhause iniciada.");
-//            }
+            if (!config.isDebug()) {
+                Config.getTelegramBot("zuhause_iot_bot").sendMessage("Zuhause iniciada.");
+            }
 
             while (true) {
                 Socket connection = server.accept();
