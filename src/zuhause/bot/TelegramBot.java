@@ -161,7 +161,7 @@ public class TelegramBot implements Serializable, Runnable {
                     dao.saveOrUpdate(pair);
                 }
 
-                LOG.msg(0, "TelegramBot - " + name);
+//                LOG.msg(0, "TelegramBot - " + name);
             } else {
                 LOG.msg(-1, "TelegramBot - ERRO: " + ret);
             }

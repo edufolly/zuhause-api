@@ -93,12 +93,22 @@ public class ApiArduino {
         return acionarDigital("cozinha", "6");
     }
 
+    /**
+     * 
+     * @return
+     * @throws SerialPortException 
+     */
     @Path("/luz/sala")
     @GET
     public Map<String, Object> getLuzSala() throws SerialPortException {
         return acionarDigital("sala", "5");
     }
 
+    /**
+     * 
+     * @return
+     * @throws SerialPortException 
+     */
     @Path("/luz/frente")
     @GET
     public Map<String, Object> getLuzFrente() throws SerialPortException {
@@ -153,11 +163,23 @@ public class ApiArduino {
      * @return
      * @throws SerialPortException
      */
-    private Map<String, Object> acionarDigital(String chave, String pino) throws SerialPortException {
-        Boolean sts = !STATUS.getOrDefault(chave, Boolean.FALSE);
-        ARDUINO.write("$D" + pino + toInt(sts) + "#");
+    public Map<String, Object> acionarDigital(String chave, String pino) throws SerialPortException {
+        Boolean status = !STATUS.getOrDefault(chave, Boolean.FALSE);
+        return acionarDigital(chave, pino, status);
+    }
+
+    /**
+     *
+     * @param chave
+     * @param pino
+     * @param status
+     * @return
+     * @throws SerialPortException
+     */
+    public Map<String, Object> acionarDigital(String chave, String pino, Boolean status) throws SerialPortException {
+        ARDUINO.write("$D" + pino + toInt(status) + "#");
         String temp = ARDUINO.waitFor("}");
-        STATUS.put(chave, sts);
+        STATUS.put(chave, status);
         Map<String, Object> map = GSON.fromJson(temp, TYPE);
         return map;
     }

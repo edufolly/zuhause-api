@@ -16,6 +16,7 @@ import zuhause.db.Pair;
 import zuhause.db.PairDao;
 import zuhause.router.DhcpClient;
 import zuhause.router.Router;
+import zuhause.router.RouterConfig;
 import zuhause.router.Rule;
 import zuhause.util.Config;
 
@@ -28,25 +29,6 @@ public class ApiRouter {
 
     private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
     private static final TelegramBot BOT = Config.getTelegramBot("zuhause_iot_bot");
-
-    /**
-     *
-     */
-    class RouterConfig {
-
-        public String ip;
-        public String mac;
-        public String name;
-        public boolean online = false;
-        public int idHost = -1;
-        public int idRule = -1;
-        public boolean paused = false;
-
-        @Override
-        public String toString() {
-            return "{" + "ip " + ip + ", mac " + mac + ", name " + name + "}";
-        }
-    }
 
     /**
      *
@@ -64,15 +46,20 @@ public class ApiRouter {
         Map<String, RouterConfig> lista = new HashMap<>();
 
         /**
-         * Cadastro no banco de dados.
+         * Nome dos dispositivos.
          */
         List<Pair> pairs = dao.selectTab("resolve_mac");
 
+        /**
+         * Dispositivos ignorados.
+         */
+        List<Pair> ignored = dao.selectTab("ignore_device");
+
         for (Pair pair : pairs) {
-            RouterConfig rc = new RouterConfig();
-            rc.name = pair.getValue();
-            rc.mac = pair.getKey();
-            lista.put(rc.mac, rc);
+            lista.put(pair.getKey(),
+                    new RouterConfig()
+                            .setName(pair.getValue())
+                            .setMac(pair.getKey()));
         }
 
         /**
@@ -82,17 +69,18 @@ public class ApiRouter {
 
         for (DhcpClient client : dhcpList) {
             if (lista.containsKey(client.getMac())) {
-                RouterConfig rc = lista.get(client.getMac());
-                rc.ip = client.getIp();
+                lista.get(client.getMac()).setIp(client.getIp());
             } else {
-                RouterConfig rc = new RouterConfig();
-                rc.name = client.getName().isEmpty() ? "DHCP Find" : client.getName();
-                rc.mac = client.getMac();
-                rc.ip = client.getIp();
+                RouterConfig rc = new RouterConfig()
+                        .setName(client.getName().isEmpty() ? "DHCP Find" : client.getName())
+                        .setMac(client.getMac())
+                        .setIp(client.getIp());
 
-                dao.Insert("resolve_mac", rc.mac, rc.name);
-                BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
-                lista.put(rc.mac, rc);
+                if (!isIgnored(ignored, rc)) {
+                    dao.Insert("resolve_mac", rc.getMac(), rc.getName());
+                    BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
+                    lista.put(rc.getMac(), rc);
+                }
             }
         }
 
@@ -108,19 +96,21 @@ public class ApiRouter {
 
         for (String mac : arp.keySet()) {
             if (lista.containsKey(mac)) {
-                RouterConfig rc = lista.get(mac);
-                rc.ip = arp.get(mac).toString();
-                rc.online = true;
+                lista.get(mac)
+                        .setIp(arp.get(mac).toString())
+                        .setOnline(true);
             } else {
-                RouterConfig rc = new RouterConfig();
-                rc.name = "ARP Find";
-                rc.mac = mac;
-                rc.ip = arp.get(mac).toString();
-                rc.online = true;
+                RouterConfig rc = new RouterConfig()
+                        .setName("ARP Find")
+                        .setMac(mac)
+                        .setIp(arp.get(mac).toString())
+                        .setOnline(true);
 
-                dao.Insert("resolve_mac", rc.mac, rc.name);
-                BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
-                lista.put(rc.mac, rc);
+                if (!isIgnored(ignored, rc)) {
+                    dao.Insert("resolve_mac", rc.getMac(), rc.getName());
+                    BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
+                    lista.put(rc.getMac(), rc);
+                }
             }
         }
 
@@ -130,18 +120,19 @@ public class ApiRouter {
         Set<String> macs = router.getConnected();
         for (String mac : macs) {
             if (lista.containsKey(mac)) {
-                RouterConfig rc = lista.get(mac);
-                rc.online = true;
+                lista.get(mac).setOnline(true);
             } else {
-                RouterConfig rc = new RouterConfig();
-                rc.name = "Router Connected";
-                rc.mac = mac;
-                rc.ip = "?";
-                rc.online = true;
+                RouterConfig rc = new RouterConfig()
+                        .setName("Desconhecido")
+                        .setMac(mac)
+                        .setIp("?")
+                        .setOnline(true);
 
-                dao.Insert("resolve_mac", rc.mac, rc.name);
-                BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
-                lista.put(rc.mac, rc);
+                if (!isIgnored(ignored, rc)) {
+                    dao.Insert("resolve_mac", rc.getMac(), rc.getName());
+                    BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
+                    lista.put(rc.getMac(), rc);
+                }
             }
         }
 
@@ -152,8 +143,7 @@ public class ApiRouter {
         for (int i = 0; i < hosts.size(); i++) {
             String host = hosts.get(i);
             if (lista.containsKey(host)) {
-                RouterConfig rc = lista.get(host);
-                rc.idHost = i;
+                lista.get(host).setIdHost(i);
             }
         }
 
@@ -164,9 +154,9 @@ public class ApiRouter {
         for (Rule rule : rules) {
             if (lista.containsKey(rule.getHost())) {
                 RouterConfig rc = lista.get(rule.getHost());
-                rc.idRule = rule.getId();
+                rc.setIdRule(rule.getId());
                 if (rule.getStatus() == 1) {
-                    rc.paused = true;
+                    rc.setPaused(true);
                 }
             }
         }
@@ -176,40 +166,30 @@ public class ApiRouter {
          */
         List<RouterConfig> retorno = new ArrayList<>(lista.values());
 
-        Collections.sort(retorno, new Comparator<RouterConfig>() {
-            @Override
-            public int compare(RouterConfig o1, RouterConfig o2) {
-                if (o1.ip == null && o2.ip == null) {
-                    return (o1.online + o1.mac).compareTo(o2.online + o2.mac);
-                }
-
-                if (o1.ip == null && o2.ip != null) {
-                    return 1;
-                }
-
-                if (o1.ip != null && o2.ip == null) {
-                    return -1;
-                }
-
-                String[] ip1 = o1.ip.split("\\.");
-                Long i1 = o1.online ? 0 : 10000000000l;
-                i1 += Long.parseLong(ip1[0]) * 1000000000l + 1000000000l;
-                i1 += Long.parseLong(ip1[1]) * 1000000l + 1000000l;
-                i1 += Long.parseLong(ip1[2]) * 1000l + 100l;
-                i1 += Long.parseLong(ip1[3]) + 1l;
-
-                String[] ip2 = o2.ip.split("\\.");
-                Long i2 = o2.online ? 0 : 10000000000l;
-                i2 += Long.parseLong(ip2[0]) * 1000000000l + 1000000000l;
-                i2 += Long.parseLong(ip2[1]) * 1000000l + 1000000l;
-                i2 += Long.parseLong(ip2[2]) * 1000l + 100l;
-                i2 += Long.parseLong(ip2[3]) + 1l;
-
-                return i1.compareTo(i2);
-            }
-        });
+        Collections.sort(retorno);
 
         return retorno;
+    }
+
+    /**
+     *
+     * @param ignored
+     * @param rc
+     * @return
+     */
+    private boolean isIgnored(List<Pair> ignored, RouterConfig rc) {
+        for (Pair ignore : ignored) {
+            if (ignore.getKey().equalsIgnoreCase("name")) {
+                if (rc.getName().equals(ignore.getValue())) {
+                    return true;
+                }
+            } else {
+                if (rc.getMac().equals(ignore.getValue())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

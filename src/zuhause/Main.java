@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import zuhause.sunrise.SunriseSunset;
+import zuhause.ws.ApiArduino;
 
 /**
  *
@@ -41,7 +43,14 @@ public class Main {
             porta = config.getTcpPort();
 
             EndpointCache.init();
+
             /*
+            try {
+                new ApiArduino().getTempInterna();
+            } catch (Exception ex) {
+
+            }
+
             // TODO - Implementar configurável.
             SCHEDULER.scheduleAtFixedRate(new TempScheduler(),
                     0, 5, TimeUnit.MINUTES);
@@ -54,7 +63,10 @@ public class Main {
 
             SCHEDULER.scheduleWithFixedDelay(new RouterFullScheduler(),
                     1, 10, TimeUnit.MINUTES);
+
+            new Thread(new SunriseSunset()).start();
             */
+            
             ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
             serverlog.msg(0, "API Server aguardando conexões na porta " + porta + ".");
 

@@ -16,6 +16,16 @@ import zuhause.ws.ApiRouter;
  */
 public class RouterScheduler implements Runnable {
 
+    /**
+     * Monitora os MAC Address que estão na chave "monitora_mac".
+     * key = MAC Address
+     * value = Nome para mensagem
+     * 
+     * A chave "mac_status" registra o último status do Mac Address.
+     * key = MAC Address
+     * value = 0 (desconectou da rede) ou 1 (conectou na rede)
+     */
+    
     private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
     private static final ServerLog LOG = ServerLog.getInstance();
     private static final TelegramBot BOT = Config.getTelegramBot("zuhause_iot_bot");
