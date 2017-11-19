@@ -7,6 +7,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import zuhause.bot.TelegramBot;
+import zuhause.db.DbConfig;
+import zuhause.db.PairDao;
 import zuhause.util.Config;
 import zuhause.util.ServerLog;
 import zuhause.ws.ApiArduino;
@@ -18,7 +20,8 @@ import zuhause.ws.ApiArduino;
 public class SunriseSunset implements Runnable {
 
     private static final transient OkHttpClient CLIENT = new OkHttpClient();
-    private static final String URL = "http://api.sunrise-sunset.org/json?lat=-22.16&lng=-42.42&formatted=0";
+    private static final boolean DEBUG = Config.getInstance().isDebug();
+    private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
     private static final Gson GSON = new Gson();
     private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
     private static final SimpleDateFormat LOC = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -27,10 +30,22 @@ public class SunriseSunset implements Runnable {
 
     @Override
     public void run() {
-        // TODO - Configurar latitude e longitude pelo banco de dados.
+        PairDao dao = new PairDao(DB_CONFIG);
 
-        String name = "frente";
-        String pin = "4";
+        String url = "http://api.sunrise-sunset.org/json?formatted=0";
+        String name;
+        String pin;
+
+        try {
+            url += "&lat=" + dao.getValue("sunrise_sunset", "lat");
+            url += "&lng=" + dao.getValue("sunrise_sunset", "lng");
+
+            name = dao.getValue("sunrise_sunset", "name");
+            pin = dao.getValue("sunrise_sunset", "pin");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return;
+        }
 
         while (true) {
             try {
@@ -41,7 +56,7 @@ public class SunriseSunset implements Runnable {
                  * Today
                  */
                 Request requestToday = new Request.Builder()
-                        .url(URL + "&date=today")
+                        .url(url + "&date=today")
                         .build();
 
                 Response responseToday = CLIENT.newCall(requestToday).execute();
@@ -57,7 +72,7 @@ public class SunriseSunset implements Runnable {
                  * Tomorrow
                  */
                 Request requestTomorrow = new Request.Builder()
-                        .url(URL + "&date=tomorrow")
+                        .url(url + "&date=tomorrow")
                         .build();
 
                 Response responseTomorrow = CLIENT.newCall(requestTomorrow).execute();
@@ -94,7 +109,9 @@ public class SunriseSunset implements Runnable {
 
                 SERVERLOG.msg(-1, msg);
 
-                BOT.sendMessage(msg);
+                if (!DEBUG) {
+                    BOT.sendMessage(msg);
+                }
 
                 new ApiArduino().acionarDigital(name, pin, (useDate % 2) == 0);
 
@@ -107,7 +124,9 @@ public class SunriseSunset implements Runnable {
 
                 SERVERLOG.msg(-1, msg);
 
-                BOT.sendMessage(msg);
+                if (!DEBUG) {
+                    BOT.sendMessage(msg);
+                }
 
             } catch (Exception ex) {
                 ex.printStackTrace();

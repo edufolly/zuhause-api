@@ -106,6 +106,25 @@ public class PairDao {
 
     /**
      *
+     * @param tab
+     * @param key
+     * @return
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
+    public String getValue(String tab, String key)
+            throws ClassNotFoundException, SQLException {
+        List<Pair> pairs = select("`tab` = ? AND `key` = ?", new String[]{tab, key}, "`when` DESC", "1");
+
+        if (pairs.isEmpty()) {
+            return null;
+        }
+
+        return pairs.get(0).getValue();
+    }
+
+    /**
+     *
      * @param whereClause
      * @param whereArgs
      * @return

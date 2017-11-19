@@ -27,3 +27,5 @@ Registro de temperatura.
 **sunrise_sunset**
 *lat* -> Latitude
 *lng* -> Longitude
+*name* -> Nome na mensagem e controle de ligado e desligado do Arduino.
+*pin* -> Pino referente ao acionamento no arduino.
