@@ -32,7 +32,7 @@ public class PairDao {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public boolean Insert(String table, String key, String value)
+    public boolean insert(String table, String key, String value)
             throws SQLException, ClassNotFoundException {
 
         try (Connection connection = DbUtil.getConnection(dbConfig)) {

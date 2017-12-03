@@ -21,18 +21,27 @@ public class TempScheduler implements Runnable {
      */
     @Override
     public void run() {
+        PairDao dao = new PairDao(DB_CONFIG);
+
+        ApiArduino apiArduino = new ApiArduino();
+
+        // Interna
         try {
-            ApiArduino apiArduino = new ApiArduino();
-
             Map<String, Object> map = apiArduino.getTempInterna();
-
-            String temp = map.get("t").toString();
-
-            new PairDao(DB_CONFIG).Insert("temp", "interna", temp);
-
-            LOG.msg(0, "TempScheduler");
+            dao.insert("temp", "interna", map.get("t").toString());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
+        // Externa
+        try {
+            Map<String, Object> map = apiArduino.getTempExterna();
+            dao.insert("temp", "externa", map.get("t").toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        LOG.msg(0, "TempScheduler");
+
     }
 }

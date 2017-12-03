@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
 import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.router.Router;
@@ -26,7 +28,21 @@ public class Config {
     private Map<String, Router> routerConfigs;
     private Map<String, TelegramBot> telegramBotConfigs;
 
+    private static final transient OkHttpClient CLIENT = new OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .build();
+
     private static transient Config INSTANCE = null;
+
+    /**
+     *
+     * @return
+     */
+    public static OkHttpClient getHttpClient() {
+        return CLIENT;
+    }
 
     /**
      *

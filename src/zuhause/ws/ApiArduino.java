@@ -2,6 +2,7 @@ package zuhause.ws;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import zuhause.annotations.GET;
 import zuhause.annotations.Path;
 import zuhause.serial.Serial;
 import zuhause.util.Config;
+import zuhause.util.HttpClient;
 
 /**
  *
@@ -25,6 +27,8 @@ public class ApiArduino {
 
     private static final Serial ARDUINO = Config.getSerial("arduino");
 
+    private static final String REMOTO = "http://10.0.0.25/";
+
     private static final Gson GSON = new Gson();
 
     private static final Type TYPE = new TypeToken< Map<String, Object>>() {
@@ -32,7 +36,8 @@ public class ApiArduino {
 
     /**
      *
-     * @return @throws SerialPortException
+     * @return Temperatura
+     * @throws SerialPortException
      */
     @Path("/temp/interna")
     @GET
@@ -41,6 +46,28 @@ public class ApiArduino {
         String temp = ARDUINO.waitFor("}");
         Map<String, Object> map = GSON.fromJson(temp, TYPE);
         return map;
+    }
+
+    /**
+     *
+     * @return Temperatura
+     * @throws IOException
+     */
+    @Path("/temp/externa")
+    @GET
+    public Map<String, Object> getTempExterna() throws IOException {
+        return GSON.fromJson(HttpClient.get(REMOTO + "temperature"), TYPE);
+    }
+
+    /**
+     *
+     * @return A0 : 0 - 1023
+     * @throws IOException
+     */
+    @Path("/ldr")
+    @GET
+    public Map<String, Object> getLdrRemoto() throws IOException {
+        return GSON.fromJson(HttpClient.get(REMOTO + "analog?0"), TYPE);
     }
 
     /**
@@ -94,9 +121,8 @@ public class ApiArduino {
     }
 
     /**
-     * 
-     * @return
-     * @throws SerialPortException 
+     *
+     * @return @throws SerialPortException
      */
     @Path("/luz/sala")
     @GET
@@ -105,9 +131,8 @@ public class ApiArduino {
     }
 
     /**
-     * 
-     * @return
-     * @throws SerialPortException 
+     *
+     * @return @throws SerialPortException
      */
     @Path("/luz/frente")
     @GET

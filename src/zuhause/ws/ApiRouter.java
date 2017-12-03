@@ -77,7 +77,7 @@ public class ApiRouter {
                         .setIp(client.getIp());
 
                 if (!isIgnored(ignored, rc)) {
-                    dao.Insert("resolve_mac", rc.getMac(), rc.getName());
+                    dao.insert("resolve_mac", rc.getMac(), rc.getName());
                     BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
                     lista.put(rc.getMac(), rc);
                 }
@@ -107,7 +107,7 @@ public class ApiRouter {
                         .setOnline(true);
 
                 if (!isIgnored(ignored, rc)) {
-                    dao.Insert("resolve_mac", rc.getMac(), rc.getName());
+                    dao.insert("resolve_mac", rc.getMac(), rc.getName());
                     BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
                     lista.put(rc.getMac(), rc);
                 }
@@ -129,7 +129,7 @@ public class ApiRouter {
                         .setOnline(true);
 
                 if (!isIgnored(ignored, rc)) {
-                    dao.Insert("resolve_mac", rc.getMac(), rc.getName());
+                    dao.insert("resolve_mac", rc.getMac(), rc.getName());
                     BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
                     lista.put(rc.getMac(), rc);
                 }

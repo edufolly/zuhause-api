@@ -59,7 +59,7 @@ public class Main {
                     0, 1, TimeUnit.MINUTES);
 
             SCHEDULER.scheduleWithFixedDelay(Config.getTelegramBot("zuhause_iot_bot"),
-                    10, 32, TimeUnit.SECONDS);
+                    10, 30, TimeUnit.SECONDS);
 
             SCHEDULER.scheduleWithFixedDelay(new RouterFullScheduler(),
                     1, 10, TimeUnit.MINUTES);

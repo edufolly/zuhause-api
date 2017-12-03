@@ -27,8 +27,7 @@ public class TelegramBot implements Serializable, Runnable {
     private String token;
     private String name;
 
-    private transient static OkHttpClient client;
-
+    private static final transient OkHttpClient CLIENT = Config.getHttpClient();
     private transient static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
     private transient static final ServerLog LOG = ServerLog.getInstance();
     private transient static final Gson GSON = new Gson();
@@ -46,18 +45,13 @@ public class TelegramBot implements Serializable, Runnable {
      * @throws IOException
      */
     private String get(HttpUrl url) throws IOException {
-        if (client == null) {
-            client = new OkHttpClient.Builder()
-                    .build();
-        }
-
         Request request = new Request.Builder()
                 .url(url)
                 .get()
                 .addHeader("cache-control", "no-cache")
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
+        try (Response response = CLIENT.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             }
@@ -105,6 +99,16 @@ public class TelegramBot implements Serializable, Runnable {
     public void run() {
         PairDao dao = new PairDao(DB_CONFIG);
 
+        ApiArduino apiArduino = new ApiArduino();
+
+        // LDR Remoto
+        try {
+            Map<String, Object> map = apiArduino.getLdrRemoto();
+            dao.insert("ldr", "remoto", map.get("A0").toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         try {
             List<Pair> p = dao.select("`tab` = ? AND `key` = ?",
                     new String[]{"telegram_bot", name},
@@ -151,8 +155,11 @@ public class TelegramBot implements Serializable, Runnable {
                         LOG.msg(update.getId(), update.getMessage().getText());
 
                         if (update.getMessage().getText().equalsIgnoreCase("temperatura")) {
-                            Map<String, Object> temp = new ApiArduino().getTempInterna();
-                            sendMessage("Temperatura atual: " + temp.get("t") + "ºC");
+                            Map<String, Object> tempInt = apiArduino.getTempInterna();
+                            Map<String, Object> tempExt = apiArduino.getTempExterna();
+
+                            sendMessage("Temperatura interna: " + tempInt.get("t") + "ºC\n"
+                                    + "Temperatura externa: " + tempExt.get("t") + "ºC");
                         }
                     }
 

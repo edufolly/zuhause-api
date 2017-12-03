@@ -3,13 +3,11 @@ package zuhause.sunrise;
 import com.google.gson.Gson;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.db.PairDao;
 import zuhause.util.Config;
+import zuhause.util.HttpClient;
 import zuhause.util.ServerLog;
 import zuhause.ws.ApiArduino;
 
@@ -19,7 +17,6 @@ import zuhause.ws.ApiArduino;
  */
 public class SunriseSunset implements Runnable {
 
-    private static final transient OkHttpClient CLIENT = new OkHttpClient();
     private static final boolean DEBUG = Config.getInstance().isDebug();
     private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
     private static final Gson GSON = new Gson();
@@ -55,14 +52,9 @@ public class SunriseSunset implements Runnable {
                 /**
                  * Today
                  */
-                Request requestToday = new Request.Builder()
-                        .url(url + "&date=today")
-                        .build();
+                String responseToday = HttpClient.get(url + "&date=today");
 
-                Response responseToday = CLIENT.newCall(requestToday).execute();
-
-                SunriseBase base = GSON.fromJson(responseToday.body().string(),
-                        SunriseBase.class);
+                SunriseBase base = GSON.fromJson(responseToday, SunriseBase.class);
 
                 dates[0] = SDF.parse(base.getResults().getSunrise());
 
@@ -71,14 +63,9 @@ public class SunriseSunset implements Runnable {
                 /**
                  * Tomorrow
                  */
-                Request requestTomorrow = new Request.Builder()
-                        .url(url + "&date=tomorrow")
-                        .build();
+                String responseTomorrow = HttpClient.get(url + "&date=tomorrow");
 
-                Response responseTomorrow = CLIENT.newCall(requestTomorrow).execute();
-
-                base = GSON.fromJson(responseTomorrow.body().string(),
-                        SunriseBase.class);
+                base = GSON.fromJson(responseTomorrow, SunriseBase.class);
 
                 dates[2] = SDF.parse(base.getResults().getSunrise());
 

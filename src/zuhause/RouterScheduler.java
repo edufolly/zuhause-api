@@ -62,7 +62,7 @@ public class RouterScheduler implements Runnable {
 
                     if (save) {
                         ativo = macs.contains(mac);
-                        dao.Insert("mac_status", mac, booleanToString(ativo));
+                        dao.insert("mac_status", mac, booleanToString(ativo));
                         BOT.sendMessage(pair.getValue()
                                 + (ativo ? " chegou em" : " saiu de") + " casa.");
                     }
