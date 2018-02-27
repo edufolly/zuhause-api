@@ -114,7 +114,9 @@ public class PairDao {
      */
     public String getValue(String tab, String key)
             throws ClassNotFoundException, SQLException {
-        List<Pair> pairs = select("`tab` = ? AND `key` = ?", new String[]{tab, key}, "`when` DESC", "1");
+
+        List<Pair> pairs = select("`tab` = ? AND `key` = ?",
+                new String[]{tab, key}, "`when` DESC", "1");
 
         if (pairs.isEmpty()) {
             return null;
@@ -190,7 +192,9 @@ public class PairDao {
                 query.append(limit);
             }
 
-            try (PreparedStatement prepareStatement = connection.prepareStatement(query.toString())) {
+            try (PreparedStatement prepareStatement = connection
+                    .prepareStatement(query.toString())) {
+
                 if (where) {
                     int i = 1;
                     for (String arg : whereArgs) {

@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
- * @author edufolly
+ * @author Eduardo Folly
  */
 public class Request {
 
@@ -29,8 +30,24 @@ public class Request {
      * @param inputStream
      * @throws MalformedRequestException
      * @throws IOException
+     * @throws TimeoutException
      */
-    public Request(InputStream inputStream) throws MalformedRequestException, IOException {
+    public Request(InputStream inputStream)
+            throws MalformedRequestException, IOException, TimeoutException {
+
+        this(inputStream, 20000);
+    }
+
+    /**
+     *
+     * @param inputStream
+     * @param timeout
+     * @throws MalformedRequestException
+     * @throws IOException
+     * @throws TimeoutException
+     */
+    public Request(InputStream inputStream, long timeout)
+            throws MalformedRequestException, IOException, TimeoutException {
 
         BufferedReader inFromClient = new BufferedReader(
                 new InputStreamReader(inputStream));
@@ -98,8 +115,16 @@ public class Request {
 
         if (headers.containsKey(HttpHeaders.CONTENT_LENGTH)) {
             int length = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH));
+            long start = System.currentTimeMillis();
             body = new char[length];
-            inFromClient.read(body, 0, length);
+            int readed = 0;
+            while (readed < length) {
+                if (System.currentTimeMillis() - start > timeout) {
+                    throw new TimeoutException("Content length incomplete (" + readed + "/" + length + ").");
+                }
+                int read = inFromClient.read(body, readed, length - readed);
+                readed += read;
+            }
         }
     }
 

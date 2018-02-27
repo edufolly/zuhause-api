@@ -27,13 +27,13 @@ public class Config {
     private Map<String, Serial> serialConfigs;
     private Map<String, Router> routerConfigs;
     private Map<String, TelegramBot> telegramBotConfigs;
-
+    //--
     private static final transient OkHttpClient CLIENT = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
             .build();
-
+    //--
     private static transient Config INSTANCE = null;
 
     /**

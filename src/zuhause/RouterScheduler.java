@@ -6,6 +6,7 @@ import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.db.Pair;
 import zuhause.db.PairDao;
+import zuhause.util.BooleanUtil;
 import zuhause.util.Config;
 import zuhause.util.ServerLog;
 import zuhause.ws.ApiRouter;
@@ -17,19 +18,19 @@ import zuhause.ws.ApiRouter;
 public class RouterScheduler implements Runnable {
 
     /**
-     * Monitora os MAC Address que estão na chave "monitora_mac".
-     * key = MAC Address
-     * value = Nome para mensagem
-     * 
-     * A chave "mac_status" registra o último status do Mac Address.
-     * key = MAC Address
-     * value = 0 (desconectou da rede) ou 1 (conectou na rede)
+     * Monitora os MAC Address que estão na chave "monitora_mac". key = MAC
+     * Address value = Nome para mensagem
+     *
+     * A chave "mac_status" registra o último status do Mac Address. key = MAC
+     * Address value = 0 (desconectou da rede) ou 1 (conectou na rede)
      */
-    
     private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
     private static final ServerLog LOG = ServerLog.getInstance();
     private static final TelegramBot BOT = Config.getTelegramBot("zuhause_iot_bot");
 
+    /**
+     *
+     */
     @Override
     public void run() {
         try {
@@ -56,13 +57,13 @@ public class RouterScheduler implements Runnable {
                     if (p.isEmpty()) {
                         save = true;
                     } else {
-                        ativo = stringToBoolean(p.get(0).getValue());
+                        ativo = BooleanUtil.fromString(p.get(0).getValue());
                         save = macs.contains(mac) != ativo;
                     }
 
                     if (save) {
                         ativo = macs.contains(mac);
-                        dao.insert("mac_status", mac, booleanToString(ativo));
+                        dao.insert("mac_status", mac, BooleanUtil.toString(ativo));
                         BOT.sendMessage(pair.getValue()
                                 + (ativo ? " chegou em" : " saiu de") + " casa.");
                     }
@@ -74,11 +75,4 @@ public class RouterScheduler implements Runnable {
         LOG.msg(0, "RouterScheduler");
     }
 
-    private boolean stringToBoolean(String s) {
-        return s.equals("1");
-    }
-
-    private String booleanToString(boolean b) {
-        return b ? "1" : "0";
-    }
 }

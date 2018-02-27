@@ -65,15 +65,15 @@ public class Response {
     }
 
     /**
-     * 
+     *
      * @param body
-     * @return 
+     * @return
      */
     public Response setBody(String body) {
         this.body = new StringBuilder(body);
         return this;
     }
-    
+
     /**
      *
      * @param string

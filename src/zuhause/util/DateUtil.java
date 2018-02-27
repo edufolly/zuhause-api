@@ -8,6 +8,12 @@ import java.util.Date;
  */
 public class DateUtil {
 
+    /**
+     *
+     * @param startDate
+     * @param endDate
+     * @return
+     */
     public static String humanDateDifference(Date startDate, Date endDate) {
 
         long different = endDate.getTime() - startDate.getTime();

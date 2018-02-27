@@ -10,6 +10,7 @@ import jssc.SerialPortException;
 import zuhause.annotations.GET;
 import zuhause.annotations.Path;
 import zuhause.serial.Serial;
+import zuhause.util.BooleanUtil;
 import zuhause.util.Config;
 import zuhause.util.HttpClient;
 
@@ -168,7 +169,7 @@ public class ApiArduino {
      */
     private String todosReles(Boolean bool) throws SerialPortException {
         STATUS.clear();
-        int toInt = toInt(bool);
+        int toInt = BooleanUtil.toInt(bool);
         for (String pino : PINOS) {
             try {
                 ARDUINO.write("$D" + pino + toInt + "#");
@@ -202,20 +203,11 @@ public class ApiArduino {
      * @throws SerialPortException
      */
     public Map<String, Object> acionarDigital(String chave, String pino, Boolean status) throws SerialPortException {
-        ARDUINO.write("$D" + pino + toInt(status) + "#");
+        ARDUINO.write("$D" + pino + BooleanUtil.toInt(status) + "#");
         String temp = ARDUINO.waitFor("}");
         STATUS.put(chave, status);
         Map<String, Object> map = GSON.fromJson(temp, TYPE);
         return map;
-    }
-
-    /**
-     *
-     * @param bool
-     * @return
-     */
-    private int toInt(Boolean bool) {
-        return bool ? 1 : 0;
     }
 
 }

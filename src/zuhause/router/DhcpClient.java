@@ -97,7 +97,8 @@ public class DhcpClient implements Serializable {
      */
     @Override
     public String toString() {
-        return "DhcpClient{" + "client=" + name + ", mac=" + mac + ", ip=" + ip + ", extra=" + extra + '}';
+        return "DhcpClient{" + "client=" + name + ", mac=" + mac
+                + ", ip=" + ip + ", extra=" + extra + '}';
     }
 
 }

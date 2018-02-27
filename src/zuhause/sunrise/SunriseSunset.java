@@ -25,6 +25,9 @@ public class SunriseSunset implements Runnable {
     private static final ServerLog SERVERLOG = ServerLog.getInstance();
     private static final TelegramBot BOT = Config.getTelegramBot("zuhause_iot_bot");
 
+    /**
+     *
+     */
     @Override
     public void run() {
         PairDao dao = new PairDao(DB_CONFIG);

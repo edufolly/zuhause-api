@@ -10,6 +10,13 @@ import java.sql.SQLException;
  */
 public class DbUtil {
 
+    /**
+     *
+     * @param config
+     * @return
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
     public static Connection getConnection(DbConfig config) throws ClassNotFoundException, SQLException {
         Class.forName(config.getDriver());
 

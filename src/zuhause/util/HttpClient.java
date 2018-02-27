@@ -35,6 +35,7 @@ public class HttpClient {
                 .build();
 
         Exception e = null;
+
         while (tentativas > 0) {
             try (okhttp3.Response response = CLIENT.newCall(request).execute()) {
 
@@ -49,7 +50,7 @@ public class HttpClient {
             }
         }
 
-        throw new IOException("Número máximo de tentativas.", e);
+        throw new IOException("Número máximo de tentativas excedidas.", e);
     }
 
 }

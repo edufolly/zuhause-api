@@ -17,8 +17,17 @@ import com.google.gson.JsonSerializer;
 public class InterfaceAdapter<T>
         implements JsonSerializer<T>, JsonDeserializer<T> {
 
+    /**
+     *
+     * @param object
+     * @param interfaceType
+     * @param context
+     * @return
+     */
     @Override
-    public final JsonElement serialize(final T object, final Type interfaceType, final JsonSerializationContext context) {
+    public final JsonElement serialize(final T object, final Type interfaceType,
+            final JsonSerializationContext context) {
+
         final JsonObject member = new JsonObject();
 
         member.addProperty("type", object.getClass().getName());
@@ -28,6 +37,14 @@ public class InterfaceAdapter<T>
         return member;
     }
 
+    /**
+     *
+     * @param elem
+     * @param interfaceType
+     * @param context
+     * @return
+     * @throws JsonParseException
+     */
     @Override
     public final T deserialize(final JsonElement elem, final Type interfaceType, final JsonDeserializationContext context)
             throws JsonParseException {
@@ -39,6 +56,11 @@ public class InterfaceAdapter<T>
         return context.deserialize(data, actualType);
     }
 
+    /**
+     *
+     * @param typeElem
+     * @return
+     */
     private Type typeForName(final JsonElement typeElem) {
         try {
             return Class.forName(typeElem.getAsString());
@@ -47,6 +69,12 @@ public class InterfaceAdapter<T>
         }
     }
 
+    /**
+     *
+     * @param wrapper
+     * @param memberName
+     * @return
+     */
     private JsonElement get(final JsonObject wrapper, final String memberName) {
         final JsonElement elem = wrapper.get(memberName);
 

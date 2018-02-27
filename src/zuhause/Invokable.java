@@ -1,5 +1,6 @@
 package zuhause;
 
+import zuhause.util.InvokableException;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
