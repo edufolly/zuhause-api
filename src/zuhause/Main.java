@@ -44,7 +44,6 @@ public class Main {
 
             EndpointCache.init();
 
-            /*
             try {
                 new ApiArduino().getTempInterna();
             } catch (Exception ex) {
@@ -55,18 +54,18 @@ public class Main {
             SCHEDULER.scheduleAtFixedRate(new TempScheduler(),
                     0, 5, TimeUnit.MINUTES);
 
-            SCHEDULER.scheduleAtFixedRate(new RouterScheduler(),
-                    0, 1, TimeUnit.MINUTES);
-
             SCHEDULER.scheduleWithFixedDelay(Config.getTelegramBot("zuhause_iot_bot"),
                     10, 30, TimeUnit.SECONDS);
 
-            SCHEDULER.scheduleWithFixedDelay(new RouterFullScheduler(),
-                    1, 10, TimeUnit.MINUTES);
-
             new Thread(new SunriseSunset()).start();
-            */
-            
+
+//            Desativado
+//            SCHEDULER.scheduleWithFixedDelay(new RouterFullScheduler(),
+//                    1, 10, TimeUnit.MINUTES);
+//
+//            SCHEDULER.scheduleAtFixedRate(new RouterScheduler(),
+//                    0, 1, TimeUnit.MINUTES);
+//
             ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
             serverlog.msg(0, "API Server aguardando conexões na porta " + porta + ".");
 

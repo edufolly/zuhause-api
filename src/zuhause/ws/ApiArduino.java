@@ -54,22 +54,22 @@ public class ApiArduino {
      * @return Temperatura
      * @throws IOException
      */
-    @Path("/temp/externa")
-    @GET
-    public Map<String, Object> getTempExterna() throws IOException {
-        return GSON.fromJson(HttpClient.get(REMOTO + "temperature"), TYPE);
-    }
+//    @Path("/temp/externa")
+//    @GET
+//    public Map<String, Object> getTempExterna() throws IOException {
+//        return GSON.fromJson(HttpClient.get(REMOTO + "temperature"), TYPE);
+//    }
 
     /**
      *
      * @return A0 : 0 - 1023
      * @throws IOException
      */
-    @Path("/ldr")
-    @GET
-    public Map<String, Object> getLdrRemoto() throws IOException {
-        return GSON.fromJson(HttpClient.get(REMOTO + "analog?0"), TYPE);
-    }
+//    @Path("/ldr")
+//    @GET
+//    public Map<String, Object> getLdrRemoto() throws IOException {
+//        return GSON.fromJson(HttpClient.get(REMOTO + "analog?0"), TYPE);
+//    }
 
     /**
      *

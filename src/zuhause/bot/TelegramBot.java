@@ -101,14 +101,6 @@ public class TelegramBot implements Serializable, Runnable {
 
         ApiArduino apiArduino = new ApiArduino();
 
-        // LDR Remoto
-        try {
-            Map<String, Object> map = apiArduino.getLdrRemoto();
-            dao.insert("ldr", "remoto", map.get("A0").toString());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
         try {
             List<Pair> p = dao.select("`tab` = ? AND `key` = ?",
                     new String[]{"telegram_bot", name},
@@ -147,28 +139,17 @@ public class TelegramBot implements Serializable, Runnable {
                  * Se houver mensagens.
                  */
                 if (!updates.isEmpty()) {
-
-//                    System.out.println("");
-//                    System.out.println(ret);
-//                    System.out.println("");
                     for (Update update : updates) {
                         LOG.msg(update.getId(), update.getMessage().getText());
 
                         if (update.getMessage().getText().equalsIgnoreCase("temperatura")) {
                             Map<String, Object> tempInt = apiArduino.getTempInterna();
-                            Map<String, Object> tempExt = apiArduino.getTempExterna();
-
-                            sendMessage("Temperatura interna: " + tempInt.get("t") + "ºC\n"
-                                    + "Temperatura externa: " + tempExt.get("t") + "ºC");
+                            sendMessage("Temperatura interna: " + tempInt.get("t") + "ºC");
                         }
                     }
-
                     pair.setValue(String.valueOf(updates.get(updates.size() - 1).getId()));
-
                     dao.saveOrUpdate(pair);
                 }
-
-//                LOG.msg(0, "TelegramBot - " + name);
             } else {
                 LOG.msg(-1, "TelegramBot - ERRO: " + ret);
             }

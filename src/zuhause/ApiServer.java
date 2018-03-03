@@ -50,8 +50,8 @@ public class ApiServer extends Thread {
         assert response != null;
 
         try {
-            serverlog.conectado(this.hashCode(),
-                    connectedClient.getInetAddress(), connectedClient.getPort());
+//            serverlog.conectado(this.hashCode(),
+//                    connectedClient.getInetAddress(), connectedClient.getPort());
 
             request = new Request(connectedClient.getInputStream());
 
@@ -88,7 +88,7 @@ public class ApiServer extends Thread {
             } catch (Exception exx) {
                 exx.printStackTrace();
             }
-            serverlog.desconectado(this.hashCode());
+//            serverlog.desconectado(this.hashCode());
         }
     }
 
