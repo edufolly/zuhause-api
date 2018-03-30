@@ -120,7 +120,8 @@ public class Serial implements Serializable {
             serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN
                     | SerialPort.FLOWCONTROL_RTSCTS_OUT);
 
-            serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
+            serialPort.addEventListener(new PortReader(),
+                    SerialPort.MASK_RXCHAR);
         }
 
         clear();
@@ -154,7 +155,8 @@ public class Serial implements Serializable {
         while (!sb.toString().contains(wait)) {
             if (System.currentTimeMillis() - start >= timeout) {
                 System.out.println(sb.toString());
-                throw new SerialPortException(serialPort.getPortName(), "waitFor", "Timeout");
+                throw new SerialPortException(serialPort
+                        .getPortName(), "waitFor", "Timeout");
             }
             try {
                 Thread.sleep(sleep);
@@ -171,7 +173,9 @@ public class Serial implements Serializable {
      */
     @Override
     public String toString() {
-        return "SerialConfig{" + "dev=" + dev + ", baundrate=" + baundrate + ", databits=" + databits + ", stopbits=" + stopbits + ", parity=" + parity + '}';
+        return "SerialConfig{" + "dev=" + dev + ", baundrate=" + baundrate
+                + ", databits=" + databits + ", stopbits=" + stopbits
+                + ", parity=" + parity + '}';
     }
 
     /**
@@ -183,7 +187,8 @@ public class Serial implements Serializable {
         public void serialEvent(SerialPortEvent event) {
             if (event.isRXCHAR() && event.getEventValue() > 0) {
                 try {
-                    String receivedData = serialPort.readString(event.getEventValue());
+                    String receivedData = serialPort
+                            .readString(event.getEventValue());
                     sb.append(receivedData);
                 } catch (SerialPortException ex) {
                     ServerLog.getInstance().erro(-1, ex);

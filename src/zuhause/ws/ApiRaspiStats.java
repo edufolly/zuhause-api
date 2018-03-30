@@ -28,7 +28,9 @@ public class ApiRaspiStats {
      */
     @Path("/disk")
     @GET
-    public List<Map<String, Object>> DiskGET() throws IOException, InterruptedException {
+    public List<Map<String, Object>> DiskGET()
+            throws IOException, InterruptedException {
+
         return TerminalHelper.execute("df");
     }
 
@@ -40,7 +42,9 @@ public class ApiRaspiStats {
      */
     @Path("/ram")
     @GET
-    public List<Map<String, Object>> RamGET() throws IOException, InterruptedException {
+    public List<Map<String, Object>> RamGET()
+            throws IOException, InterruptedException {
+
         return TerminalHelper.execute("free -o");
     }
 
@@ -52,7 +56,9 @@ public class ApiRaspiStats {
      */
     @Path("/top")
     @GET
-    public List<Map<String, Object>> TopGET() throws IOException, InterruptedException {
+    public List<Map<String, Object>> TopGET()
+            throws IOException, InterruptedException {
+
         return TerminalHelper.execute("top -bn1w1024", 6);
     }
 
@@ -64,7 +70,8 @@ public class ApiRaspiStats {
     @Path("/temp")
     @GET
     public Map<String, Object> TempGET() throws IOException {
-        String temp = TerminalHelper.rawExecute("/opt/vc/bin/vcgencmd measure_temp").trim();
+        String temp = TerminalHelper
+                .rawExecute("/opt/vc/bin/vcgencmd measure_temp").trim();
 
         String[] p = temp.split("=");
         String[] q = p[1].split("'");
@@ -86,7 +93,8 @@ public class ApiRaspiStats {
     @Path("/volts")
     @GET
     public Map<String, Object> VoltsGET() throws IOException {
-        String temp = TerminalHelper.rawExecute("/opt/vc/bin/vcgencmd measure_volts").trim();
+        String temp = TerminalHelper
+                .rawExecute("/opt/vc/bin/vcgencmd measure_volts").trim();
 
         String[] p = temp.split("=");
 
@@ -134,7 +142,9 @@ public class ApiRaspiStats {
      */
     @Path("/proc")
     @GET
-    public List<Map<String, Object>> ProcGET() throws IOException, InterruptedException {
+    public List<Map<String, Object>> ProcGET()
+            throws IOException, InterruptedException {
+
         // sudo apt-get install sysstat
         return TerminalHelper.execute("mpstat -P ON", 2);
     }
@@ -194,7 +204,8 @@ public class ApiRaspiStats {
                 mapa.put("mac", line.substring(start).trim());
             } else if (line.contains(key[1])) {
                 int start = line.indexOf(key[1]) + key[1].length();
-                mapa.put("channel", Integer.parseInt(line.substring(start).trim()));
+                mapa.put("channel", Integer
+                        .parseInt(line.substring(start).trim()));
             } else if (line.contains(key[2])) {
                 int start = line.indexOf(key[2]) + key[2].length();
                 int end = line.length() - 1;
@@ -207,15 +218,16 @@ public class ApiRaspiStats {
 
                 String[] q = p[0].split("/");
 
-                float f = Float.parseFloat(q[0]) / Float.parseFloat(q[1]) * 100f;
+                float f = Float.parseFloat(q[0])
+                        / Float.parseFloat(q[1]) * 100f;
 
                 mapa.put("quality_percent", f);
 
-                mapa.put("signal", Integer.parseInt(p[1].substring(key[4].length())));
+                mapa.put("signal", Integer
+                        .parseInt(p[1].substring(key[4].length())));
             }
         }
 
         return mapa;
     }
-
 }

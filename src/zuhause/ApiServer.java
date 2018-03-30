@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
+import zuhause.util.Config;
 import zuhause.util.HttpStatus;
 import zuhause.util.ServerLog;
 import zuhause.util.Request;
@@ -20,8 +21,10 @@ import zuhause.util.Response;
  */
 public class ApiServer extends Thread {
 
+    private static final boolean DEBUG = Config.getInstance().isDebug();
     private static final Locale LOCALE = new Locale("en", "US");
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", LOCALE);
+    private static final SimpleDateFormat SDF
+            = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", LOCALE);
     //--
     private Socket connectedClient = null;
 
@@ -50,8 +53,11 @@ public class ApiServer extends Thread {
         assert response != null;
 
         try {
-//            serverlog.conectado(this.hashCode(),
-//                    connectedClient.getInetAddress(), connectedClient.getPort());
+            if (DEBUG) {
+                serverlog.conectado(this.hashCode(),
+                        connectedClient.getInetAddress(),
+                        connectedClient.getPort());
+            }
 
             request = new Request(connectedClient.getInputStream());
 
@@ -88,7 +94,10 @@ public class ApiServer extends Thread {
             } catch (Exception exx) {
                 exx.printStackTrace();
             }
-//            serverlog.desconectado(this.hashCode());
+            
+            if (DEBUG) {
+                serverlog.desconectado(this.hashCode());
+            }
         }
     }
 
@@ -123,6 +132,5 @@ public class ApiServer extends Thread {
         public void setStacktrace(String stacktrace) {
             this.stacktrace = stacktrace;
         }
-
     }
 }

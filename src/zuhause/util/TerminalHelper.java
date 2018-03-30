@@ -26,7 +26,9 @@ public class TerminalHelper {
         Process p = rt.exec(command);
         StringBuilder sb = new StringBuilder();
 
-        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        BufferedReader input = new BufferedReader(
+                new InputStreamReader(p.getInputStream()));
+
         String line;
 
         while ((line = input.readLine()) != null) {
@@ -58,14 +60,16 @@ public class TerminalHelper {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static List<Map<String, Object>> execute(String command, int startLine)
-            throws IOException, InterruptedException {
+    public static List<Map<String, Object>> execute(String command,
+            int startLine) throws IOException, InterruptedException {
 
         Runtime rt = Runtime.getRuntime();
         Process p = rt.exec(command);
         List<String> lines = new ArrayList();
 
-        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        BufferedReader input = new BufferedReader(
+                new InputStreamReader(p.getInputStream()));
+
         String line;
         int l = 0;
 
@@ -105,7 +109,9 @@ public class TerminalHelper {
                     boolean spaceOnly = true;
 
                     for (int j = 1; j < lines.length - 1; j++) {
-                        if (lines[j].length() >= i && lines[j].charAt(i) != ' ') {
+                        if (lines[j].length() >= i
+                                && lines[j].charAt(i) != ' ') {
+
                             spaceOnly = false;
                             break;
                         }
@@ -137,14 +143,21 @@ public class TerminalHelper {
      * @param startLine
      * @return
      */
-    private static List<Map<String, Object>> getObjects(List<Triple> header, String[] lines, int startLine) {
+    private static List<Map<String, Object>> getObjects(List<Triple> header,
+            String[] lines, int startLine) {
+
         List<Map<String, Object>> objects = new ArrayList();
 
         for (int i = startLine; i < lines.length - 1; i++) {
             String l = lines[i];
             Map<String, Object> object = new HashMap();
             for (Triple triple : header) {
-                String value = l.substring(triple.begin, triple.end == -1 || triple.end > l.length() ? l.length() : triple.end).trim();
+                String value = l.substring(triple.begin,
+                        triple.end == -1 || triple.end > l.length()
+                        ? l.length()
+                        : triple.end)
+                        .trim();
+
                 object.put(triple.key, value);
             }
             objects.add(object);
@@ -160,7 +173,9 @@ public class TerminalHelper {
      * @param key2
      * @return
      */
-    private static List<Map<String, Object>> mergeMap(List<Map<String, Object>> list1, String key1, List<Map<String, Object>> list2, String key2) {
+    private static List<Map<String, Object>> mergeMap(
+            List<Map<String, Object>> list1, String key1, 
+            List<Map<String, Object>> list2, String key2) {
 
         for (Map object1 : list1) {
 
@@ -188,5 +203,4 @@ public class TerminalHelper {
 
         return list1;
     }
-
 }

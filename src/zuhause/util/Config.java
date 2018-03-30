@@ -28,11 +28,12 @@ public class Config {
     private Map<String, Router> routerConfigs;
     private Map<String, TelegramBot> telegramBotConfigs;
     //--
-    private static final transient OkHttpClient CLIENT = new OkHttpClient.Builder()
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .writeTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
-            .build();
+    private static final transient OkHttpClient CLIENT
+            = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
+                    .build();
     //--
     private static transient Config INSTANCE = null;
 
@@ -52,7 +53,8 @@ public class Config {
         if (INSTANCE == null) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             try {
-                INSTANCE = gson.fromJson(new FileReader("config.json"), Config.class);
+                INSTANCE = gson.fromJson(new FileReader("config.json"),
+                        Config.class);
             } catch (FileNotFoundException ex) {
                 INSTANCE = new Config();
                 INSTANCE.setTcpPort(8088);
@@ -60,9 +62,10 @@ public class Config {
                 INSTANCE.setAppPackage("zuhause.ws");
                 try {
                     String json = gson.toJson(INSTANCE);
-                    FileOutputStream out = new FileOutputStream("config.json");
-                    out.write(json.getBytes());
-                    out.close();
+                    try (FileOutputStream out
+                            = new FileOutputStream("config.json")) {
+                        out.write(json.getBytes());
+                    }
                 } catch (Exception exx) {
                     ex.printStackTrace();
                 }
@@ -238,8 +241,9 @@ public class Config {
      *
      * @param telegramBotConfigs
      */
-    public void setTelegramBotConfigs(Map<String, TelegramBot> telegramBotConfigs) {
+    public void setTelegramBotConfigs(
+            Map<String, TelegramBot> telegramBotConfigs) {
+
         this.telegramBotConfigs = telegramBotConfigs;
     }
-
 }

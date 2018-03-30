@@ -30,5 +30,4 @@ public class Triple {
     public String toString() {
         return "(" + key + ", [" + begin + ", " + end + "])";
     }
-
 }

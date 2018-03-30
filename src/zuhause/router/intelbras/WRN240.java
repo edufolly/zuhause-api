@@ -32,8 +32,8 @@ import zuhause.router.Rule;
  */
 public class WRN240 extends Router {
 
-    private transient static final ScriptEngine ENGINE = new ScriptEngineManager()
-            .getEngineByName("JavaScript");
+    private transient static final ScriptEngine ENGINE
+            = new ScriptEngineManager().getEngineByName("JavaScript");
 
     private transient static final Pattern PATTERN = Pattern
             .compile("([0-9A-F]{2}-){5}([0-9A-F]{2})");
@@ -48,20 +48,27 @@ public class WRN240 extends Router {
      */
     private String get(HttpUrl url) throws IOException {
         if (client == null) {
-            client = new OkHttpClient.Builder()
-                    .authenticator(new Authenticator() {
-                        @Override
-                        public Request authenticate(Route route, Response response) throws IOException {
-                            if (response.request().header("Authorization") != null) {
-                                return null;
-                            }
 
-                            String credential = Credentials.basic(getUser(), getPassword());
-                            return response.request().newBuilder()
-                                    .header("Authorization", credential)
-                                    .build();
-                        }
-                    })
+            Authenticator authenticator = new Authenticator() {
+                @Override
+                public Request authenticate(Route route, Response response)
+                        throws IOException {
+
+                    if (response.request().header("Authorization") != null) {
+                        return null;
+                    }
+
+                    String credential = Credentials
+                            .basic(getUser(), getPassword());
+
+                    return response.request().newBuilder()
+                            .header("Authorization", credential)
+                            .build();
+                }
+            };
+
+            client = new OkHttpClient.Builder()
+                    .authenticator(authenticator)
                     .build();
         }
 
@@ -126,7 +133,8 @@ public class WRN240 extends Router {
             dhcpClient.setClient(scriptObj.get(String.valueOf(j)).toString());
             dhcpClient.setMac(scriptObj.get(String.valueOf(j + 1)).toString());
             dhcpClient.setIp(scriptObj.get(String.valueOf(j + 2)).toString());
-            dhcpClient.setExtra(scriptObj.get(String.valueOf(j + 3)).toString());
+            dhcpClient.setExtra(scriptObj.get(String.valueOf(j + 3))
+                    .toString());
 
             lista.add(dhcpClient);
         }
@@ -249,7 +257,8 @@ public class WRN240 extends Router {
 
         List<String> hosts = new ArrayList<>();
 
-        ScriptObjectMirror scriptObj = scriptArray(html, "hosts_lists_page_param");
+        ScriptObjectMirror scriptObj
+                = scriptArray(html, "hosts_lists_page_param");
 
         int total = Integer.parseInt(scriptObj.get("4").toString());
 
@@ -281,7 +290,8 @@ public class WRN240 extends Router {
 
         List<String> hosts = new ArrayList<>();
 
-        ScriptObjectMirror scriptObj = scriptArray(html, "hosts_lists_data_param");
+        ScriptObjectMirror scriptObj
+                = scriptArray(html, "hosts_lists_data_param");
 
         int total = scriptObj.size() / 5;
 
@@ -353,7 +363,8 @@ public class WRN240 extends Router {
 
         List<Rule> rules = new ArrayList();
 
-        ScriptObjectMirror scriptObj = scriptArray(html, "access_rules_page_param");
+        ScriptObjectMirror scriptObj
+                = scriptArray(html, "access_rules_page_param");
 
         int total = Integer.parseInt(scriptObj.get("4").toString());
 
@@ -392,7 +403,8 @@ public class WRN240 extends Router {
     private List<Rule> ruleProcPage(String html, int page) throws Exception {
         List<Rule> rules = new ArrayList();
 
-        ScriptObjectMirror scriptObj = scriptArray(html, "access_rules_data_param");
+        ScriptObjectMirror scriptObj
+                = scriptArray(html, "access_rules_data_param");
 
         int total = scriptObj.size() / 8;
 
@@ -401,14 +413,21 @@ public class WRN240 extends Router {
 
             Rule rule = new Rule()
                     .setId((page - 1) * 8 + i)
-                    .setName(scriptObj.get(String.valueOf(j)).toString())
-                    .setIdHost(Integer.parseInt(scriptObj.get(String.valueOf(j + 1)).toString()))
-                    .setIdDestination(Integer.parseInt(scriptObj.get(String.valueOf(j + 2)).toString()))
-                    .setIdSchedule(Integer.parseInt(scriptObj.get(String.valueOf(j + 3)).toString()))
+                    .setName(scriptObj
+                            .get(String.valueOf(j)).toString())
+                    .setIdHost(Integer.parseInt(scriptObj
+                            .get(String.valueOf(j + 1)).toString()))
+                    .setIdDestination(Integer.parseInt(scriptObj
+                            .get(String.valueOf(j + 2)).toString()))
+                    .setIdSchedule(Integer.parseInt(scriptObj
+                            .get(String.valueOf(j + 3)).toString()))
                     .setHost(scriptObj.get(String.valueOf(j + 4)).toString())
-                    .setDestination(scriptObj.get(String.valueOf(j + 5)).toString())
-                    .setSchedule(scriptObj.get(String.valueOf(j + 6)).toString())
-                    .setStatus(Integer.parseInt(scriptObj.get(String.valueOf(j + 7)).toString()));
+                    .setDestination(scriptObj
+                            .get(String.valueOf(j + 5)).toString())
+                    .setSchedule(scriptObj
+                            .get(String.valueOf(j + 6)).toString())
+                    .setStatus(Integer.parseInt(scriptObj
+                            .get(String.valueOf(j + 7)).toString()));
 
             rules.add(rule);
         }
@@ -424,7 +443,6 @@ public class WRN240 extends Router {
 
         List<String> hosts = hostList();
 
-//        List<Rule> rules;
         if (!hosts.contains(mac)) {
             hosts = hostCreate(mac);
         }
@@ -500,5 +518,4 @@ public class WRN240 extends Router {
 
         return ruleProc(get(url), page);
     }
-
 }

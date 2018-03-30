@@ -18,12 +18,21 @@ import zuhause.ws.ApiArduino;
 public class SunriseSunset implements Runnable {
 
     private static final boolean DEBUG = Config.getInstance().isDebug();
+
     private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
+
     private static final Gson GSON = new Gson();
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
-    private static final SimpleDateFormat LOC = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
+    private static final SimpleDateFormat SDF
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+    
+    private static final SimpleDateFormat LOC 
+            = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    
     private static final ServerLog SERVERLOG = ServerLog.getInstance();
-    private static final TelegramBot BOT = Config.getTelegramBot("zuhause_iot_bot");
+    
+    private static final TelegramBot BOT 
+            = Config.getTelegramBot("zuhause_iot_bot");
 
     /**
      *
@@ -55,9 +64,11 @@ public class SunriseSunset implements Runnable {
                 /**
                  * Today
                  */
-                String responseToday = HttpClient.get(url + "&date=today");
+                String responseToday = HttpClient
+                        .get(url + "&date=today");
 
-                SunriseBase base = GSON.fromJson(responseToday, SunriseBase.class);
+                SunriseBase base = GSON.fromJson(responseToday, 
+                        SunriseBase.class);
 
                 dates[0] = SDF.parse(base.getResults().getSunrise());
 
@@ -66,7 +77,8 @@ public class SunriseSunset implements Runnable {
                 /**
                  * Tomorrow
                  */
-                String responseTomorrow = HttpClient.get(url + "&date=tomorrow");
+                String responseTomorrow = HttpClient
+                        .get(url + "&date=tomorrow");
 
                 base = GSON.fromJson(responseTomorrow, SunriseBase.class);
 
@@ -129,5 +141,4 @@ public class SunriseSunset implements Runnable {
             }
         }
     }
-
 }

@@ -30,7 +30,9 @@ import zuhause.util.Response;
  */
 public class Invokable {
 
-    private static final transient Pattern PATTERN_PARAM = Pattern.compile(":([^/]+?)/");
+    private static final transient Pattern PATTERN_PARAM
+            = Pattern.compile(":([^/]+?)/");
+
     private static final transient Gson GSON = new Gson();
 
     //--
@@ -46,7 +48,9 @@ public class Invokable {
      * @param endpoint
      * @param pattern
      */
-    public Invokable(Class clazz, Method method, String endpoint, Pattern pattern) {
+    public Invokable(Class clazz, Method method, String endpoint,
+            Pattern pattern) {
+
         this.clazz = clazz;
         this.method = method;
         this.pattern = pattern;
@@ -85,7 +89,9 @@ public class Invokable {
      * @return
      * @throws InvokableException
      */
-    public Response invoke(Request request, Response response) throws InvokableException {
+    public Response invoke(Request request, Response response)
+            throws InvokableException {
+
         try {
             Map<String, String> map = new HashMap();
 
@@ -109,7 +115,9 @@ public class Invokable {
             String body = null;
 
             for (Annotation annotation : method.getAnnotations()) {
-                Class<? extends Annotation> annotationType = annotation.annotationType();
+                Class<? extends Annotation> annotationType
+                        = annotation.annotationType();
+
                 if (annotationType.equals(PathParam.class)) {
                     for (String key : ((PathParam) annotation).value()) {
                         if (map.containsKey(key)) {
@@ -122,14 +130,16 @@ public class Invokable {
                 } else if (annotationType.equals(QueryStringParam.class)) {
                     for (String key : ((QueryStringParam) annotation).value()) {
                         if (request.containsQueryString(key)) {
-                            objects[i] = cast(parameterTypes[i], request.getQueryString(key));
+                            objects[i] = cast(parameterTypes[i],
+                                    request.getQueryString(key));
                         } else {
                             objects[i] = null;
                         }
                         i++;
                     }
                 } else if (annotationType.equals(BodyParam.class)) {
-                    objects[i] = GSON.fromJson(String.valueOf(request.getBody()).trim(), parameterTypes[i]);
+                    objects[i] = GSON.fromJson(String.valueOf(request
+                            .getBody()).trim(), parameterTypes[i]);
                     i++;
                 } else if (annotationType.equals(ReturnType.class)) {
                     mediaType = ((ReturnType) annotation).value().mediaType;
@@ -160,7 +170,8 @@ public class Invokable {
 
                 body = GSON.toJson(invoked);
             } else {
-                response.addHeader(HttpHeaders.CONTENT_TYPE, mediaType.toString());
+                response.addHeader(HttpHeaders.CONTENT_TYPE,
+                        mediaType.toString());
 
                 body = invoked.toString();
             }
@@ -173,7 +184,8 @@ public class Invokable {
                 response.setBody(body);
             }
         } catch (InvocationTargetException e) {
-            throw new InvokableException(e.getTargetException().getMessage(), e);
+            throw new InvokableException(e.getTargetException()
+                    .getMessage(), e);
         } catch (Exception ex) {
             throw new InvokableException(ex.getMessage(), ex);
         }
@@ -196,7 +208,8 @@ public class Invokable {
      * @param value
      * @return
      */
-    private Object cast(Class type, String value) throws UnsupportedEncodingException {
+    private Object cast(Class type, String value)
+            throws UnsupportedEncodingException {
 
         value = URLDecoder.decode(value, "UTF-8");
 
@@ -222,5 +235,4 @@ public class Invokable {
             return type.cast(value);
         }
     }
-
 }

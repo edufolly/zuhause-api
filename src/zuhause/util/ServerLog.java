@@ -10,7 +10,9 @@ import java.util.Date;
  */
 public class ServerLog {
 
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat SDF
+            = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private static final ServerLog INSTANCE;
 
     /**

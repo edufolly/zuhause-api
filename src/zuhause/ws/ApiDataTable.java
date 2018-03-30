@@ -24,21 +24,26 @@ import zuhause.util.Config;
 public class ApiDataTable {
 
     private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-    private static final SimpleDateFormat dbDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    private static final SimpleDateFormat sdf
+            = new SimpleDateFormat("HH:mm");
+
+    private static final SimpleDateFormat dbDate
+            = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /**
-     * 
+     *
      * @param table
      * @param key
      * @return Data
      * @throws ClassNotFoundException
-     * @throws SQLException 
+     * @throws SQLException
      */
     @Path("/:table/:key")
     @GET
     @PathParam({"table", "key"})
-    public Data teste(String table, String key) throws ClassNotFoundException, SQLException {
+    public Data teste(String table, String key)
+            throws ClassNotFoundException, SQLException {
 
         Data data = new Data();
 

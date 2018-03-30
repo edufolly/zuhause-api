@@ -24,9 +24,13 @@ public class RouterScheduler implements Runnable {
      * A chave "mac_status" registra o último status do Mac Address. key = MAC
      * Address value = 0 (desconectou da rede) ou 1 (conectou na rede)
      */
-    private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
+    private static final DbConfig DB_CONFIG
+            = Config.getDbConfig("localhost");
+
     private static final ServerLog LOG = ServerLog.getInstance();
-    private static final TelegramBot BOT = Config.getTelegramBot("zuhause_iot_bot");
+
+    private static final TelegramBot BOT
+            = Config.getTelegramBot("zuhause_iot_bot");
 
     /**
      *
@@ -63,9 +67,13 @@ public class RouterScheduler implements Runnable {
 
                     if (save) {
                         ativo = macs.contains(mac);
-                        dao.insert("mac_status", mac, BooleanUtil.toString(ativo));
+
+                        dao.insert("mac_status", mac, BooleanUtil
+                                .toString(ativo));
+
                         BOT.sendMessage(pair.getValue()
-                                + (ativo ? " chegou em" : " saiu de") + " casa.");
+                                + (ativo ? " chegou em" : " saiu de")
+                                + " casa.");
                     }
                 }
             }
@@ -74,5 +82,4 @@ public class RouterScheduler implements Runnable {
         }
         LOG.msg(0, "RouterScheduler");
     }
-
 }

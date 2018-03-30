@@ -81,7 +81,8 @@ public class EndpointCache {
 
         ClassPath classpath = ClassPath.from(loader);
 
-        for (ClassPath.ClassInfo classInfo : classpath.getTopLevelClasses(packageName)) {
+        for (ClassPath.ClassInfo classInfo : classpath
+                .getTopLevelClasses(packageName)) {
 
             Class clazz = classInfo.load();
 
@@ -96,15 +97,20 @@ public class EndpointCache {
                 }
 
                 if (classEndpoint.endsWith("/")) {
-                    classEndpoint = classEndpoint.substring(0, classEndpoint.length() - 1);
+                    classEndpoint = classEndpoint
+                            .substring(0, classEndpoint.length() - 1);
                 }
 
-                String patternEndpoint = classEndpoint.replaceAll(":([^/]+?)/", "([^/]+?)/");
+                String patternEndpoint = classEndpoint
+                        .replaceAll(":([^/]+?)/", "([^/]+?)/");
 
                 String prefix = "WS";
 
-                Pattern compile = Pattern.compile(prefix + " " + patternEndpoint + "$");
-                cache.put(compile, new Invokable(clazz, null, patternEndpoint, compile));
+                Pattern compile = Pattern
+                        .compile(prefix + " " + patternEndpoint + "$");
+
+                cache.put(compile,
+                        new Invokable(clazz, null, patternEndpoint, compile));
             }
 
             if (clazz.isAnnotationPresent(Path.class)) {
@@ -116,7 +122,8 @@ public class EndpointCache {
                 }
 
                 if (classEndpoint.endsWith("/")) {
-                    classEndpoint = classEndpoint.substring(0, classEndpoint.length() - 1);
+                    classEndpoint = classEndpoint
+                            .substring(0, classEndpoint.length() - 1);
                 }
             }
 
@@ -126,7 +133,8 @@ public class EndpointCache {
 
                 if (method.isAnnotationPresent(Path.class)) {
 
-                    String methodEndpoint = method.getAnnotation(Path.class).value();
+                    String methodEndpoint = method
+                            .getAnnotation(Path.class).value();
 
                     if (!methodEndpoint.startsWith("/")) {
                         methodEndpoint = "/" + methodEndpoint;
@@ -142,7 +150,8 @@ public class EndpointCache {
                     }
 
                     // Busca parâmetros
-                    String patternEndpoint = finalEndpoint.replaceAll(":([^/]+?)/", "([^/]+?)/");
+                    String patternEndpoint = finalEndpoint
+                            .replaceAll(":([^/]+?)/", "([^/]+?)/");
 
                     // Método
                     String prefix = null;
@@ -164,8 +173,11 @@ public class EndpointCache {
                     }
 
                     if (prefix != null) {
-                        Pattern compile = Pattern.compile(prefix + " " + patternEndpoint + "$");
-                        cache.put(compile, new Invokable(clazz, method, finalEndpoint, compile));
+                        Pattern compile = Pattern
+                                .compile(prefix + " " + patternEndpoint + "$");
+
+                        cache.put(compile, new Invokable(clazz, method,
+                                finalEndpoint, compile));
                     }
                 }
             }

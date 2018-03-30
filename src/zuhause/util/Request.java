@@ -71,13 +71,15 @@ public class Request {
         }
 
         if (requestArray.isEmpty()) {
-            throw new MalformedRequestException("Request String vazia. Conexão recusada.");
+            throw new MalformedRequestException("Request String vazia. "
+                    + "Conexão recusada.");
         }
 
         String[] stline = requestArray.get(0).split(" ");
 
         if (stline.length < 3) {
-            throw new MalformedRequestException("Padrões do protocolo HTTP não contemplados.");
+            throw new MalformedRequestException("Padrões do protocolo "
+                    + "HTTP não contemplados.");
         }
 
         httpMethod = stline[0];
@@ -91,7 +93,6 @@ public class Request {
             qs = split[1];
         }
 
-        // path = URLDecoder.decode(split[0], "UTF-8");
         path = split[0];
 
         if (!path.startsWith("/")) {
@@ -114,13 +115,15 @@ public class Request {
         }
 
         if (headers.containsKey(HttpHeaders.CONTENT_LENGTH)) {
-            int length = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH));
+            int length = Integer.parseInt(headers
+                    .get(HttpHeaders.CONTENT_LENGTH));
             long start = System.currentTimeMillis();
             body = new char[length];
             int readed = 0;
             while (readed < length) {
                 if (System.currentTimeMillis() - start > timeout) {
-                    throw new TimeoutException("Content length incomplete (" + readed + "/" + length + ").");
+                    throw new TimeoutException("Content length incomplete ("
+                            + readed + "/" + length + ").");
                 }
                 int read = inFromClient.read(body, readed, length - readed);
                 readed += read;

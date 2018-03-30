@@ -17,7 +17,9 @@ public class DbUtil {
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    public static Connection getConnection(DbConfig config) throws ClassNotFoundException, SQLException {
+    public static Connection getConnection(DbConfig config)
+            throws ClassNotFoundException, SQLException {
+
         Class.forName(config.getDriver());
 
         return DriverManager.getConnection(config.getUrl(),

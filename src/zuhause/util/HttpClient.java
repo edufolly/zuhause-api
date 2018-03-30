@@ -37,7 +37,8 @@ public class HttpClient {
         Exception e = null;
 
         while (tentativas > 0) {
-            try (okhttp3.Response response = CLIENT.newCall(request).execute()) {
+            try (okhttp3.Response response = CLIENT.newCall(request)
+                    .execute()) {
 
                 if (!response.isSuccessful()) {
                     throw new IOException("Unexpected code " + response);

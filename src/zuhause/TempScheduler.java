@@ -33,18 +33,6 @@ public class TempScheduler implements Runnable {
             ex.printStackTrace();
         }
 
-        /**
-         * Desativado
-         */
-        // Externa
-//        try {
-//            Map<String, Object> map = apiArduino.getTempExterna();
-//            dao.insert("temp", "externa", map.get("t").toString());
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-
         LOG.msg(0, "TempScheduler");
-
     }
 }

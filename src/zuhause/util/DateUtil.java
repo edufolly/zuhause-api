@@ -34,7 +34,7 @@ public class DateUtil {
 
         long elapsedSeconds = different / secondsInMilli;
 
-        return String.format("%d dias, %d horas, %d minutos, %d segundos", elapsedDays,
-                elapsedHours, elapsedMinutes, elapsedSeconds);
+        return String.format("%d dias, %d horas, %d minutos, %d segundos",
+                elapsedDays, elapsedHours, elapsedMinutes, elapsedSeconds);
     }
 }

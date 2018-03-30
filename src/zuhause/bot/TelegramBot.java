@@ -27,9 +27,15 @@ public class TelegramBot implements Serializable, Runnable {
     private String token;
     private String name;
 
-    private static final transient OkHttpClient CLIENT = Config.getHttpClient();
-    private transient static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
-    private transient static final ServerLog LOG = ServerLog.getInstance();
+    private static final transient OkHttpClient CLIENT
+            = Config.getHttpClient();
+
+    private transient static final DbConfig DB_CONFIG
+            = Config.getDbConfig("localhost");
+
+    private transient static final ServerLog LOG
+            = ServerLog.getInstance();
+
     private transient static final Gson GSON = new Gson();
 
     /**
@@ -142,12 +148,19 @@ public class TelegramBot implements Serializable, Runnable {
                     for (Update update : updates) {
                         LOG.msg(update.getId(), update.getMessage().getText());
 
-                        if (update.getMessage().getText().equalsIgnoreCase("temperatura")) {
-                            Map<String, Object> tempInt = apiArduino.getTempInterna();
-                            sendMessage("Temperatura interna: " + tempInt.get("t") + "ºC");
+                        if (update.getMessage().getText()
+                                .equalsIgnoreCase("temperatura")) {
+
+                            Map<String, Object> tempInt
+                                    = apiArduino.getTempInterna();
+
+                            sendMessage("Temperatura interna: "
+                                    + tempInt.get("t") + "ºC");
                         }
                     }
-                    pair.setValue(String.valueOf(updates.get(updates.size() - 1).getId()));
+                    pair.setValue(String.valueOf(updates.get(updates.size() - 1)
+                            .getId()));
+
                     dao.saveOrUpdate(pair);
                 }
             } else {

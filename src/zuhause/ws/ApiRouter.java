@@ -2,7 +2,6 @@ package zuhause.ws;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,9 @@ import zuhause.util.Config;
 public class ApiRouter {
 
     private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
-    private static final TelegramBot BOT = Config.getTelegramBot("zuhause_iot_bot");
+
+    private static final TelegramBot BOT
+            = Config.getTelegramBot("zuhause_iot_bot");
 
     /**
      *
@@ -72,13 +73,15 @@ public class ApiRouter {
                 lista.get(client.getMac()).setIp(client.getIp());
             } else {
                 RouterConfig rc = new RouterConfig()
-                        .setName(client.getName().isEmpty() ? "DHCP Find" : client.getName())
+                        .setName(client.getName()
+                                .isEmpty() ? "DHCP Find" : client.getName())
                         .setMac(client.getMac())
                         .setIp(client.getIp());
 
                 if (!isIgnored(ignored, rc)) {
                     dao.insert("resolve_mac", rc.getMac(), rc.getName());
-                    BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
+                    BOT.sendMessage("Novo dispositivo encontrado: "
+                            + rc.toString());
                     lista.put(rc.getMac(), rc);
                 }
             }
@@ -108,7 +111,8 @@ public class ApiRouter {
 
                 if (!isIgnored(ignored, rc)) {
                     dao.insert("resolve_mac", rc.getMac(), rc.getName());
-                    BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
+                    BOT.sendMessage("Novo dispositivo encontrado: "
+                            + rc.toString());
                     lista.put(rc.getMac(), rc);
                 }
             }
@@ -130,7 +134,8 @@ public class ApiRouter {
 
                 if (!isIgnored(ignored, rc)) {
                     dao.insert("resolve_mac", rc.getMac(), rc.getName());
-                    BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
+                    BOT.sendMessage("Novo dispositivo encontrado: "
+                            + rc.toString());
                     lista.put(rc.getMac(), rc);
                 }
             }
@@ -298,5 +303,4 @@ public class ApiRouter {
     public List<Rule> getRulePplay(int idRule) throws Exception {
         return Config.getRouter("WRN240").rulePlay(idRule);
     }
-
 }

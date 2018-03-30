@@ -16,7 +16,8 @@ import zuhause.ws.ApiArduino;
  */
 public class Main {
 
-    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(4);
+    private final static ScheduledExecutorService SCHEDULER
+            = Executors.newScheduledThreadPool(2);
 
     /**
      *
@@ -54,7 +55,8 @@ public class Main {
             SCHEDULER.scheduleAtFixedRate(new TempScheduler(),
                     0, 5, TimeUnit.MINUTES);
 
-            SCHEDULER.scheduleWithFixedDelay(Config.getTelegramBot("zuhause_iot_bot"),
+            SCHEDULER.scheduleWithFixedDelay(Config
+                    .getTelegramBot("zuhause_iot_bot"),
                     10, 30, TimeUnit.SECONDS);
 
             new Thread(new SunriseSunset()).start();
@@ -66,11 +68,15 @@ public class Main {
 //            SCHEDULER.scheduleAtFixedRate(new RouterScheduler(),
 //                    0, 1, TimeUnit.MINUTES);
 //
-            ServerSocket server = new ServerSocket(porta, config.getMaxConnections());
-            serverlog.msg(0, "API Server aguardando conexões na porta " + porta + ".");
+            ServerSocket server = new ServerSocket(porta,
+                    config.getMaxConnections());
+
+            serverlog.msg(0, "API Server aguardando conexões na porta "
+                    + porta + ".");
 
             if (!config.isDebug()) {
-                Config.getTelegramBot("zuhause_iot_bot").sendMessage("Zuhause iniciada.");
+                Config.getTelegramBot("zuhause_iot_bot")
+                        .sendMessage("Zuhause iniciada.");
             }
 
             while (true) {

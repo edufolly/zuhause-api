@@ -13,6 +13,7 @@ import com.google.gson.JsonSerializer;
 /**
  *
  * @author Eduardo Folly
+ * @param <T>
  */
 public class InterfaceAdapter<T>
         implements JsonSerializer<T>, JsonDeserializer<T> {
@@ -46,8 +47,10 @@ public class InterfaceAdapter<T>
      * @throws JsonParseException
      */
     @Override
-    public final T deserialize(final JsonElement elem, final Type interfaceType, final JsonDeserializationContext context)
+    public final T deserialize(final JsonElement elem, final Type interfaceType,
+            final JsonDeserializationContext context)
             throws JsonParseException {
+
         final JsonObject member = (JsonObject) elem;
         final JsonElement typeString = get(member, "type");
         final JsonElement data = get(member, "data");
@@ -84,5 +87,4 @@ public class InterfaceAdapter<T>
         }
         return elem;
     }
-
 }

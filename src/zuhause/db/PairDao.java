@@ -40,7 +40,9 @@ public class PairDao {
             String query = "INSERT INTO `pairs` "
                     + "(`tab`, `key`, `value`) VALUES (?, ?, ?);";
 
-            try (PreparedStatement prepareStatement = connection.prepareStatement(query)) {
+            try (PreparedStatement prepareStatement
+                    = connection.prepareStatement(query)) {
+
                 prepareStatement.setString(1, table);
                 prepareStatement.setString(2, key);
                 prepareStatement.setString(3, value);
@@ -67,7 +69,8 @@ public class PairDao {
                         + "SET `tab` = ?, `key` = ?, `value` = ? "
                         + "WHERE `id` = ?";
 
-                try (PreparedStatement prepareStatement = connection.prepareStatement(query)) {
+                try (PreparedStatement prepareStatement
+                        = connection.prepareStatement(query)) {
 
                     prepareStatement.setString(1, pair.getTab());
                     prepareStatement.setString(2, pair.getKey());
@@ -80,7 +83,9 @@ public class PairDao {
                 String query = "INSERT INTO `pairs` "
                         + "(`tab`, `key`, `value`) VALUES (?, ?, ?);";
 
-                try (PreparedStatement prepareStatement = connection.prepareStatement(query)) {
+                try (PreparedStatement prepareStatement
+                        = connection.prepareStatement(query)) {
+
                     prepareStatement.setString(1, pair.getTab());
                     prepareStatement.setString(2, pair.getKey());
                     prepareStatement.setString(3, pair.getValue());

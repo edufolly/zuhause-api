@@ -2,7 +2,6 @@ package zuhause.ws;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +11,6 @@ import zuhause.annotations.Path;
 import zuhause.serial.Serial;
 import zuhause.util.BooleanUtil;
 import zuhause.util.Config;
-import zuhause.util.HttpClient;
 
 /**
  *
@@ -27,8 +25,6 @@ public class ApiArduino {
         "8", "9", "A", "B", "C", "D"};
 
     private static final Serial ARDUINO = Config.getSerial("arduino");
-
-    private static final String REMOTO = "http://10.0.0.25/";
 
     private static final Gson GSON = new Gson();
 
@@ -48,28 +44,6 @@ public class ApiArduino {
         Map<String, Object> map = GSON.fromJson(temp, TYPE);
         return map;
     }
-
-    /**
-     *
-     * @return Temperatura
-     * @throws IOException
-     */
-//    @Path("/temp/externa")
-//    @GET
-//    public Map<String, Object> getTempExterna() throws IOException {
-//        return GSON.fromJson(HttpClient.get(REMOTO + "temperature"), TYPE);
-//    }
-
-    /**
-     *
-     * @return A0 : 0 - 1023
-     * @throws IOException
-     */
-//    @Path("/ldr")
-//    @GET
-//    public Map<String, Object> getLdrRemoto() throws IOException {
-//        return GSON.fromJson(HttpClient.get(REMOTO + "analog?0"), TYPE);
-//    }
 
     /**
      *
@@ -189,7 +163,9 @@ public class ApiArduino {
      * @return
      * @throws SerialPortException
      */
-    public Map<String, Object> acionarDigital(String chave, String pino) throws SerialPortException {
+    public Map<String, Object> acionarDigital(String chave, String pino)
+            throws SerialPortException {
+
         Boolean status = !STATUS.getOrDefault(chave, Boolean.FALSE);
         return acionarDigital(chave, pino, status);
     }
@@ -202,7 +178,9 @@ public class ApiArduino {
      * @return
      * @throws SerialPortException
      */
-    public Map<String, Object> acionarDigital(String chave, String pino, Boolean status) throws SerialPortException {
+    public Map<String, Object> acionarDigital(String chave, String pino,
+            Boolean status) throws SerialPortException {
+
         ARDUINO.write("$D" + pino + BooleanUtil.toInt(status) + "#");
         String temp = ARDUINO.waitFor("}");
         STATUS.put(chave, status);
