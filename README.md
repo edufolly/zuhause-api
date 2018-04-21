@@ -1,7 +1,8 @@
 # zuhause-api
 
-Java API for IoT on Raspberry Pi
+Nano Java API Server for IoT to Raspberry Pi
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/09740a7075f841989c23f9eade1ff473)](https://www.codacy.com/app/edufolly/zuhause-api?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=edufolly/zuhause-api&amp;utm_campaign=Badge_Grade)
 
 ###### Chaves
 **monitora_mac**

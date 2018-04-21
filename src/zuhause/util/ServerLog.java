@@ -88,7 +88,6 @@ public class ServerLog {
      */
     public void fatal(int id, Throwable t) {
         erro(id, t);
-        throw new RuntimeException(t);
     }
 
     /**
@@ -98,6 +97,5 @@ public class ServerLog {
      */
     public void fatal(int id, String msg) {
         erro(id, msg);
-        System.exit(0);
     }
 }
