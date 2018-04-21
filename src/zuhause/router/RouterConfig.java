@@ -16,12 +16,6 @@ public class RouterConfig implements Comparable {
 
     /**
      *
-     */
-    public RouterConfig() {
-    }
-
-    /**
-     *
      * @return
      */
     public String getIp() {
@@ -157,6 +151,14 @@ public class RouterConfig implements Comparable {
 
     /**
      *
+     * @return
+     */
+    public String getOnlineMac() {
+        return this.isOnline() + this.getMac();
+    }
+
+    /**
+     *
      * @param o
      * @return
      */
@@ -166,8 +168,7 @@ public class RouterConfig implements Comparable {
         RouterConfig o2 = (RouterConfig) o;
 
         if (this.getIp() == null && o2.getIp() == null) {
-            return (this.isOnline() + this.getMac())
-                    .compareTo(o2.isOnline() + o2.getMac());
+            return this.getOnlineMac().compareTo(o2.getOnlineMac());
         }
 
         if (this.getIp() == null && o2.getIp() != null) {
@@ -178,11 +179,11 @@ public class RouterConfig implements Comparable {
             return -1;
         }
 
-        String[] ip1 = this.getIp().split("\\.");
-        Long i1 = toLong(this.isOnline() ? 0 : 10000000000l, ip1);
+        Long i1 = toLong(this.isOnline() ? 0 : 10000000000l,
+                this.getIp().split("\\."));
 
-        String[] ip2 = o2.getIp().split("\\.");
-        Long i2 = toLong(o2.isOnline() ? 0 : 10000000000l, ip2);
+        Long i2 = toLong(o2.isOnline() ? 0 : 10000000000l,
+                o2.getIp().split("\\."));
 
         return i1.compareTo(i2);
     }

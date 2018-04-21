@@ -11,6 +11,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import zuhause.util.Config;
 import zuhause.util.HttpStatus;
+import zuhause.util.InvokableException;
 import zuhause.util.ServerLog;
 import zuhause.util.Request;
 import zuhause.util.Response;
@@ -66,7 +67,7 @@ public class ApiServer extends Thread {
             Invokable invokable = EndpointCache.find(request);
 
             if (invokable == null) {
-                throw new Exception("Endpoint não encontrado.\n"
+                throw new InvokableException("Endpoint não encontrado.\n"
                         + "HTTP Method: " + request.getHttpMethod()
                         + " - Path: " + request.getPath());
             }
@@ -94,7 +95,7 @@ public class ApiServer extends Thread {
             } catch (Exception exx) {
                 exx.printStackTrace();
             }
-            
+
             if (DEBUG) {
                 serverlog.desconectado(this.hashCode());
             }

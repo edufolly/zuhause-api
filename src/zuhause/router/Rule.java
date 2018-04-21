@@ -18,12 +18,6 @@ public class Rule {
 
     /**
      *
-     */
-    public Rule() {
-    }
-
-    /**
-     *
      * @return
      */
     public int getId() {
