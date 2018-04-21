@@ -31,6 +31,8 @@ public class ApiRouter {
     private static final TelegramBot BOT
             = Config.getTelegramBot("zuhause_iot_bot");
 
+    private final PairDao dao = new PairDao(DB_CONFIG);
+
     /**
      *
      * @return JSON
@@ -40,66 +42,112 @@ public class ApiRouter {
     @GET
     public List<RouterConfig> getFullConfig() throws Exception {
 
-        PairDao dao = new PairDao(DB_CONFIG);
-
         Router router = Config.getRouter("WRN240");
 
-        Map<String, RouterConfig> lista = new HashMap<>();
+        Map<String, RouterConfig> list = new HashMap<>();
 
         /**
          * Nome dos dispositivos.
          */
         List<Pair> pairs = dao.selectTab("resolve_mac");
 
-        /**
-         * Dispositivos ignorados.
-         */
-        List<Pair> ignored = dao.selectTab("ignore_device");
-
         for (Pair pair : pairs) {
-            lista.put(pair.getKey(),
+            list.put(pair.getKey(),
                     new RouterConfig()
                             .setName(pair.getValue())
                             .setMac(pair.getKey()));
         }
 
         /**
+         * Dispositivos ignorados.
+         */
+        List<Pair> ignored = dao.selectTab("ignore_device");
+
+        /**
          * Lista dos clientes DHCP do roteador.
          */
+        dhcpList(router, list, ignored);
+
+        /**
+         * Verificação ARP no roteador.
+         */
+        verifyArp(router, list, ignored);
+
+        /**
+         * Conectados no roteador.
+         */
+        getConnected(router, list, ignored);
+
+        /**
+         * Hosts cadastrados no roteador.
+         */
+        registredHost(list);
+
+        /**
+         * Regras cadastradas no roteador.
+         */
+        rules(list);
+
+        /**
+         *
+         */
+        List<RouterConfig> retorno = new ArrayList<>(list.values());
+
+        Collections.sort(retorno);
+
+        return retorno;
+    }
+
+    /**
+     *
+     * @param router
+     * @param list
+     * @param ignored
+     * @throws Exception
+     */
+    private void dhcpList(Router router,
+            Map<String, RouterConfig> list, List<Pair> ignored)
+            throws Exception {
+
         List<DhcpClient> dhcpList = router.dhcpList();
 
         for (DhcpClient client : dhcpList) {
-            if (lista.containsKey(client.getMac())) {
-                lista.get(client.getMac()).setIp(client.getIp());
+            if (list.containsKey(client.getMac())) {
+                list.get(client.getMac()).setIp(client.getIp());
             } else {
                 RouterConfig rc = new RouterConfig()
                         .setName(client.getName()
                                 .isEmpty() ? "DHCP Find" : client.getName())
                         .setMac(client.getMac())
                         .setIp(client.getIp());
-
                 if (!isIgnored(ignored, rc)) {
                     dao.insert("resolve_mac", rc.getMac(), rc.getName());
                     BOT.sendMessage("Novo dispositivo encontrado: "
                             + rc.toString());
-                    lista.put(rc.getMac(), rc);
+                    list.put(rc.getMac(), rc);
                 }
             }
         }
+    }
 
-        /**
-         * Verificação ARP no Raspi.
-         */
+    /**
+     *
+     * @param router
+     * @param list
+     * @param ignored
+     * @throws Exception
+     */
+    private void verifyArp(Router router,
+            Map<String, RouterConfig> list, List<Pair> ignored)
+            throws Exception {
+
         Map<String, Object> arp = new ApiRaspiStats().arpGet();
 
-        /**
-         * Verificação ARP no roteador.
-         */
         arp.putAll(router.arpList());
 
         for (String mac : arp.keySet()) {
-            if (lista.containsKey(mac)) {
-                lista.get(mac)
+            if (list.containsKey(mac)) {
+                list.get(mac)
                         .setIp(arp.get(mac).toString())
                         .setOnline(true);
             } else {
@@ -113,18 +161,28 @@ public class ApiRouter {
                     dao.insert("resolve_mac", rc.getMac(), rc.getName());
                     BOT.sendMessage("Novo dispositivo encontrado: "
                             + rc.toString());
-                    lista.put(rc.getMac(), rc);
+                    list.put(rc.getMac(), rc);
                 }
             }
         }
+    }
 
-        /**
-         * Conectados no roteador.
-         */
+    /**
+     *
+     * @param router
+     * @param list
+     * @param ignored
+     * @throws Exception
+     */
+    private void getConnected(Router router,
+            Map<String, RouterConfig> list, List<Pair> ignored)
+            throws Exception {
+
         Set<String> macs = router.getConnected();
+
         for (String mac : macs) {
-            if (lista.containsKey(mac)) {
-                lista.get(mac).setOnline(true);
+            if (list.containsKey(mac)) {
+                list.get(mac).setOnline(true);
             } else {
                 RouterConfig rc = new RouterConfig()
                         .setName("Desconhecido")
@@ -134,46 +192,11 @@ public class ApiRouter {
 
                 if (!isIgnored(ignored, rc)) {
                     dao.insert("resolve_mac", rc.getMac(), rc.getName());
-                    BOT.sendMessage("Novo dispositivo encontrado: "
-                            + rc.toString());
-                    lista.put(rc.getMac(), rc);
+                    BOT.sendMessage("Novo dispositivo encontrado: " + rc.toString());
+                    list.put(rc.getMac(), rc);
                 }
             }
         }
-
-        /**
-         * Hosts cadastrados no roteador.
-         */
-        List<String> hosts = getHostList();
-        for (int i = 0; i < hosts.size(); i++) {
-            String host = hosts.get(i);
-            if (lista.containsKey(host)) {
-                lista.get(host).setIdHost(i);
-            }
-        }
-
-        /**
-         * Regras cadastradas no roteador.
-         */
-        List<Rule> rules = getRuleList();
-        for (Rule rule : rules) {
-            if (lista.containsKey(rule.getHost())) {
-                RouterConfig rc = lista.get(rule.getHost());
-                rc.setIdRule(rule.getId());
-                if (rule.getStatus() == 1) {
-                    rc.setPaused(true);
-                }
-            }
-        }
-
-        /**
-         *
-         */
-        List<RouterConfig> retorno = new ArrayList<>(lista.values());
-
-        Collections.sort(retorno);
-
-        return retorno;
     }
 
     /**
@@ -195,6 +218,41 @@ public class ApiRouter {
             }
         }
         return false;
+    }
+
+    /**
+     *
+     * @param list
+     * @throws Exception
+     */
+    private void registredHost(Map<String, RouterConfig> list)
+            throws Exception {
+
+        List<String> hosts = getHostList();
+        for (int i = 0; i < hosts.size(); i++) {
+            String host = hosts.get(i);
+            if (list.containsKey(host)) {
+                list.get(host).setIdHost(i);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param list
+     * @throws Exception
+     */
+    private void rules(Map<String, RouterConfig> list) throws Exception {
+        List<Rule> rules = getRuleList();
+        for (Rule rule : rules) {
+            if (list.containsKey(rule.getHost())) {
+                RouterConfig rc = list.get(rule.getHost());
+                rc.setIdRule(rule.getId());
+                if (rule.getStatus() == 1) {
+                    rc.setPaused(true);
+                }
+            }
+        }
     }
 
     /**

@@ -1,6 +1,7 @@
 package zuhause.sunrise;
 
 import com.google.gson.Gson;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import zuhause.bot.TelegramBot;
@@ -25,34 +26,58 @@ public class SunriseSunset implements Runnable {
 
     private static final SimpleDateFormat SDF
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
-    
-    private static final SimpleDateFormat LOC 
+
+    private static final SimpleDateFormat LOC
             = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-    
+
     private static final ServerLog SERVERLOG = ServerLog.getInstance();
-    
-    private static final TelegramBot BOT 
+
+    private static final TelegramBot BOT
             = Config.getTelegramBot("zuhause_iot_bot");
+
+    private final PairDao dao = new PairDao(DB_CONFIG);
+
+    /**
+     *
+     * @return
+     */
+    private String getUrl() throws ClassNotFoundException, SQLException {
+        String url = "http://api.sunrise-sunset.org/json?formatted=0";
+        url += "&lat=" + dao.getValue("sunrise_sunset", "lat");
+        url += "&lng=" + dao.getValue("sunrise_sunset", "lng");
+        return url;
+    }
+
+    /**
+     *
+     * @return
+     */
+    private String getName() throws ClassNotFoundException, SQLException {
+        return dao.getValue("sunrise_sunset", "name");
+    }
+
+    /**
+     *
+     * @return
+     */
+    private String getPin() throws ClassNotFoundException, SQLException {
+        return dao.getValue("sunrise_sunset", "pin");
+    }
 
     /**
      *
      */
     @Override
     public void run() {
-        PairDao dao = new PairDao(DB_CONFIG);
-
-        String url = "http://api.sunrise-sunset.org/json?formatted=0";
+        String url;
         String name;
         String pin;
 
         try {
-            url += "&lat=" + dao.getValue("sunrise_sunset", "lat");
-            url += "&lng=" + dao.getValue("sunrise_sunset", "lng");
-
-            name = dao.getValue("sunrise_sunset", "name");
-            pin = dao.getValue("sunrise_sunset", "pin");
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            url = getUrl();
+            name = getName();
+            pin = getPin();
+        } catch (ClassNotFoundException | SQLException ex) {
             return;
         }
 
@@ -67,7 +92,7 @@ public class SunriseSunset implements Runnable {
                 String responseToday = HttpClient
                         .get(url + "&date=today");
 
-                SunriseBase base = GSON.fromJson(responseToday, 
+                SunriseBase base = GSON.fromJson(responseToday,
                         SunriseBase.class);
 
                 dates[0] = SDF.parse(base.getResults().getSunrise());
