@@ -1,5 +1,7 @@
 # zuhause-api
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0822e76a97d644d2afcefc032e9453d5)](https://app.codacy.com/app/edufolly/zuhause-api?utm_source=github.com&utm_medium=referral&utm_content=edufolly/zuhause-api&utm_campaign=badger)
+
 Java API for IoT on Raspberry Pi
 
 
