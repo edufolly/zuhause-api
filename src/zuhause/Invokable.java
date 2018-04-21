@@ -112,7 +112,7 @@ public class Invokable {
 
             MediaType mediaType = null;
 
-            String body = null;
+            String body;
 
             for (Annotation annotation : method.getAnnotations()) {
                 Class<? extends Annotation> annotationType
@@ -211,28 +211,28 @@ public class Invokable {
     private Object cast(Class type, String value)
             throws UnsupportedEncodingException {
 
-        value = URLDecoder.decode(value, "UTF-8");
+        String decoded = URLDecoder.decode(value, "UTF-8");
 
         if (type.equals(Integer.class)) {
-            return Integer.parseInt(value);
+            return Integer.parseInt(decoded);
         } else if (type.equals(int.class)) {
-            return Integer.parseInt(value);
+            return Integer.parseInt(decoded);
         } else if (type.equals(Long.class)) {
-            return Long.parseLong(value);
+            return Long.parseLong(decoded);
         } else if (type.equals(long.class)) {
-            return Long.parseLong(value);
+            return Long.parseLong(decoded);
         } else if (type.equals(float.class)) {
-            return Float.parseFloat(value);
+            return Float.parseFloat(decoded);
         } else if (type.equals(Float.class)) {
-            return Float.parseFloat(value);
+            return Float.parseFloat(decoded);
         } else if (type.equals(boolean.class)) {
-            return Boolean.parseBoolean(value);
+            return Boolean.parseBoolean(decoded);
         } else if (type.equals(Boolean.class)) {
-            return Boolean.parseBoolean(value);
+            return Boolean.parseBoolean(decoded);
         } else if (type.equals(String.class)) {
-            return value;
+            return decoded;
         } else {
-            return type.cast(value);
+            return type.cast(decoded);
         }
     }
 }

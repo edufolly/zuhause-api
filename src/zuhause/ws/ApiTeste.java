@@ -14,7 +14,7 @@ public class ApiTeste {
 
     @GET
     @ReturnType(MediaTypeEnum.TEXT)
-    public String TesteGET() {
+    public String testeGet() {
         return "Teste OK!!";
     }
 

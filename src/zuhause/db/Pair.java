@@ -16,12 +16,6 @@ public class Pair {
 
     /**
      *
-     */
-    public Pair() {
-    }
-
-    /**
-     *
      * @return
      */
     public long getId() {

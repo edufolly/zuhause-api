@@ -23,9 +23,6 @@ public class User {
     @SerializedName("language_code")
     private String languageCode;
 
-    public User() {
-    }
-
     public int getId() {
         return id;
     }

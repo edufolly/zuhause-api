@@ -40,9 +40,6 @@ public class Message {
     private String text;
 
     // TODO - Implementações não realizadas.
-    public Message() {
-    }
-
     public int getId() {
         return id;
     }

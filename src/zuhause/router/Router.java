@@ -18,13 +18,6 @@ public class Router implements Serializable {
 
     /**
      *
-     */
-    public Router() {
-
-    }
-
-    /**
-     *
      * @return
      */
     public String getHost() {

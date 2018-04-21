@@ -15,12 +15,6 @@ public class DbConfig implements Serializable {
 
     /**
      *
-     */
-    public DbConfig() {
-    }
-
-    /**
-     *
      * @return
      */
     public String getDriver() {

@@ -13,12 +13,6 @@ public class SunriseBase implements Serializable {
 
     /**
      *
-     */
-    public SunriseBase() {
-    }
-
-    /**
-     *
      * @return
      */
     public String getStatus() {

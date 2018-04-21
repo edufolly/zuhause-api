@@ -15,9 +15,6 @@ public class Update {
     //--
     private Message message;
 
-    public Update() {
-    }
-
     public int getId() {
         return id;
     }

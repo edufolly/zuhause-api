@@ -15,12 +15,6 @@ public class DhcpClient implements Serializable {
 
     /**
      *
-     */
-    public DhcpClient() {
-    }
-
-    /**
-     *
      * @return
      */
     public String getName() {

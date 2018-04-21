@@ -40,12 +40,6 @@ public class TelegramBot implements Serializable, Runnable {
 
     /**
      *
-     */
-    public TelegramBot() {
-    }
-
-    /**
-     *
      * @param url
      * @return String
      * @throws IOException

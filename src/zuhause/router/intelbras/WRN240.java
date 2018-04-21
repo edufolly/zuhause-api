@@ -313,16 +313,16 @@ public class WRN240 extends Router {
     public List<String> hostCreate(String mac) throws Exception {
 
         // TODO - Validar mac
-        mac = mac.toUpperCase();
+        String macValid = mac.toUpperCase();
 
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("http")
                 .host(getHost())
                 .addPathSegments("userRpm/AccessCtrlHostsListsRpm.htm")
-                .encodedQuery("addr_type=0&hosts_lists_name=" + mac)
+                .encodedQuery("addr_type=0&hosts_lists_name=" + macValid)
                 .addQueryParameter("src_ip_start", "")
                 .addQueryParameter("src_ip_end", "")
-                .addQueryParameter("mac_addr", mac)
+                .addQueryParameter("mac_addr", macValid)
                 .addQueryParameter("Changed", "0")
                 .addQueryParameter("SelIndex", "0")
                 .addQueryParameter("fromAdd", "0")
@@ -439,23 +439,23 @@ public class WRN240 extends Router {
     public List<Rule> ruleCreate(String mac) throws Exception {
 
         // TODO - Validar mac
-        mac = mac.toUpperCase();
+        String validMac = mac.toUpperCase();
 
         List<String> hosts = hostList();
 
-        if (!hosts.contains(mac)) {
-            hosts = hostCreate(mac);
+        if (!hosts.contains(validMac)) {
+            hosts = hostCreate(validMac);
         }
 
-        if (hosts.contains(mac)) {
+        if (hosts.contains(validMac)) {
 
-            int idHost = hosts.indexOf(mac);
+            int idHost = hosts.indexOf(validMac);
 
             HttpUrl url = new HttpUrl.Builder()
                     .scheme("http")
                     .host(getHost())
                     .addPathSegments("userRpm/AccessCtrlAccessRulesRpm.htm")
-                    .addQueryParameter("rule_name", mac)
+                    .addQueryParameter("rule_name", validMac)
                     .addQueryParameter("hosts_lists", String.valueOf(idHost))
                     .addQueryParameter("targets_lists", "255")
                     .addQueryParameter("scheds_lists", "255")

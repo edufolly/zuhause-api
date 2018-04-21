@@ -21,7 +21,7 @@ public class BooleanUtil {
      * @return
      */
     public static boolean fromString(String s) {
-        return s.equals("1");
+        return "1".equals(s);
     }
 
     /**

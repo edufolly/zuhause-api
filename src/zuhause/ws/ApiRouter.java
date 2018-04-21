@@ -90,7 +90,7 @@ public class ApiRouter {
         /**
          * Verificação ARP no Raspi.
          */
-        Map<String, Object> arp = new ApiRaspiStats().getArp();
+        Map<String, Object> arp = new ApiRaspiStats().arpGet();
 
         /**
          * Verificação ARP no roteador.

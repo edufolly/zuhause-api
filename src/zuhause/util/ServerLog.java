@@ -88,7 +88,7 @@ public class ServerLog {
      */
     public void fatal(int id, Throwable t) {
         erro(id, t);
-        System.exit(0);
+        throw new RuntimeException(t);
     }
 
     /**

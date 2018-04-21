@@ -41,12 +41,6 @@ public class SunriseResult implements Serializable {
 
     /**
      *
-     */
-    public SunriseResult() {
-    }
-
-    /**
-     *
      * @return
      */
     public String getSunrise() {

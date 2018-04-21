@@ -31,10 +31,8 @@ public class Chat {
     //--
     private String description;
     //--
-    private String invite_link;
-
-    public Chat() {
-    }
+    @SerializedName("invite_link")
+    private String inviteLink;
 
     public int getId() {
         return id;
@@ -108,12 +106,12 @@ public class Chat {
         this.description = description;
     }
 
-    public String getInvite_link() {
-        return invite_link;
+    public String getInviteLink() {
+        return inviteLink;
     }
 
-    public void setInvite_link(String invite_link) {
-        this.invite_link = invite_link;
+    public void setInviteLink(String inviteLink) {
+        this.inviteLink = inviteLink;
     }
 
 }

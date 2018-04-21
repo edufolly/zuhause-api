@@ -33,7 +33,7 @@ public class Main {
             Config config = Config.getInstance();
 
             for (String arg : args) {
-                if (arg.equals("--debug")) {
+                if ("--debug".equals(arg)) {
                     config.setDebug(true);
                     serverlog.msg(0, "Debug");
                     serverlog.msg(0, "Debug");

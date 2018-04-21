@@ -16,9 +16,6 @@ public class ChatPhoto {
     @SerializedName("big_file_id")
     private String bigFileId;
 
-    public ChatPhoto() {
-    }
-
     public String getSmallFileId() {
         return smallFileId;
     }

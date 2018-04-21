@@ -14,9 +14,6 @@ public class Result {
     @SerializedName("result")
     private List<Update> updates;
 
-    public Result() {
-    }
-
     public boolean isOk() {
         return ok;
     }

@@ -28,7 +28,7 @@ public class ApiRaspiStats {
      */
     @Path("/disk")
     @GET
-    public List<Map<String, Object>> DiskGET()
+    public List<Map<String, Object>> diskGet()
             throws IOException, InterruptedException {
 
         return TerminalHelper.execute("df");
@@ -42,7 +42,7 @@ public class ApiRaspiStats {
      */
     @Path("/ram")
     @GET
-    public List<Map<String, Object>> RamGET()
+    public List<Map<String, Object>> ramGet()
             throws IOException, InterruptedException {
 
         return TerminalHelper.execute("free -o");
@@ -56,7 +56,7 @@ public class ApiRaspiStats {
      */
     @Path("/top")
     @GET
-    public List<Map<String, Object>> TopGET()
+    public List<Map<String, Object>> topGet()
             throws IOException, InterruptedException {
 
         return TerminalHelper.execute("top -bn1w1024", 6);
@@ -69,7 +69,7 @@ public class ApiRaspiStats {
      */
     @Path("/temp")
     @GET
-    public Map<String, Object> TempGET() throws IOException {
+    public Map<String, Object> tempGet() throws IOException {
         String temp = TerminalHelper
                 .rawExecute("/opt/vc/bin/vcgencmd measure_temp").trim();
 
@@ -92,7 +92,7 @@ public class ApiRaspiStats {
      */
     @Path("/volts")
     @GET
-    public Map<String, Object> VoltsGET() throws IOException {
+    public Map<String, Object> voltsGet() throws IOException {
         String temp = TerminalHelper
                 .rawExecute("/opt/vc/bin/vcgencmd measure_volts").trim();
 
@@ -118,7 +118,7 @@ public class ApiRaspiStats {
      */
     @Path("/uptime")
     @GET
-    public Map<String, Object> UptimeGET() throws IOException, ParseException {
+    public Map<String, Object> uptimeGet() throws IOException, ParseException {
         String since = TerminalHelper.rawExecute("uptime -s").trim();
 
         Map<String, Object> mapa = new HashMap();
@@ -142,7 +142,7 @@ public class ApiRaspiStats {
      */
     @Path("/proc")
     @GET
-    public List<Map<String, Object>> ProcGET()
+    public List<Map<String, Object>> procGet()
             throws IOException, InterruptedException {
 
         // sudo apt-get install sysstat
@@ -156,7 +156,7 @@ public class ApiRaspiStats {
      */
     @Path("/arp")
     @GET
-    public Map<String, Object> getArp() throws IOException {
+    public Map<String, Object> arpGet() throws IOException {
         // sudo apt-get install arp-scan
 
         Map<String, Object> mapa = new HashMap();
@@ -187,7 +187,7 @@ public class ApiRaspiStats {
      */
     @Path("/wireless")
     @GET
-    public Map<String, Object> iftopGET() throws IOException {
+    public Map<String, Object> wirelessGet() throws IOException {
 
         Map<String, Object> mapa = new HashMap();
 

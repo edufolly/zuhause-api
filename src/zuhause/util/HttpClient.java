@@ -36,7 +36,9 @@ public class HttpClient {
 
         Exception e = null;
 
-        while (tentativas > 0) {
+        int tent = tentativas;
+
+        while (tent > 0) {
             try (okhttp3.Response response = CLIENT.newCall(request)
                     .execute()) {
 
@@ -47,7 +49,7 @@ public class HttpClient {
                 return response.body().string();
             } catch (Exception ex) {
                 e = ex;
-                tentativas--;
+                tent--;
             }
         }
 

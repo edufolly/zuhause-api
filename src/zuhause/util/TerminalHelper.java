@@ -173,6 +173,7 @@ public class TerminalHelper {
      * @param key2
      * @return
      */
+    /*
     private static List<Map<String, Object>> mergeMap(
             List<Map<String, Object>> list1, String key1, 
             List<Map<String, Object>> list2, String key2) {
@@ -203,4 +204,5 @@ public class TerminalHelper {
 
         return list1;
     }
+     */
 }

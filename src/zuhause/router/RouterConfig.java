@@ -179,20 +179,27 @@ public class RouterConfig implements Comparable {
         }
 
         String[] ip1 = this.getIp().split("\\.");
-        Long i1 = this.isOnline() ? 0 : 10000000000l;
-        i1 += Long.parseLong(ip1[0]) * 1000000000l + 1000000000l;
-        i1 += Long.parseLong(ip1[1]) * 1000000l + 1000000l;
-        i1 += Long.parseLong(ip1[2]) * 1000l + 100l;
-        i1 += Long.parseLong(ip1[3]) + 1l;
+        Long i1 = toLong(this.isOnline() ? 0 : 10000000000l, ip1);
 
         String[] ip2 = o2.getIp().split("\\.");
-        Long i2 = o2.isOnline() ? 0 : 10000000000l;
-        i2 += Long.parseLong(ip2[0]) * 1000000000l + 1000000000l;
-        i2 += Long.parseLong(ip2[1]) * 1000000l + 1000000l;
-        i2 += Long.parseLong(ip2[2]) * 1000l + 100l;
-        i2 += Long.parseLong(ip2[3]) + 1l;
+        Long i2 = toLong(o2.isOnline() ? 0 : 10000000000l, ip2);
 
         return i1.compareTo(i2);
+    }
+
+    /**
+     *
+     * @param i
+     * @param ip
+     * @return
+     */
+    private Long toLong(Long i, String[] ip) {
+        Long ret = i;
+        ret += Long.parseLong(ip[0]) * 1000000000l + 1000000000l;
+        ret += Long.parseLong(ip[1]) * 1000000l + 1000000l;
+        ret += Long.parseLong(ip[2]) * 1000l + 100l;
+        ret += Long.parseLong(ip[3]) + 1l;
+        return ret;
     }
 
 }
