@@ -1,14 +1,14 @@
 package zuhause.sunrise;
 
-import com.google.gson.Gson;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.db.PairDao;
 import zuhause.util.Config;
-import zuhause.util.HttpClient;
 import zuhause.util.ServerLog;
 import zuhause.ws.ApiArduino;
 
@@ -22,11 +22,6 @@ public class SunriseSunset implements Runnable {
 
     private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
 
-    private static final Gson GSON = new Gson();
-
-    private static final SimpleDateFormat SDF
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
-
     private static final SimpleDateFormat LOC
             = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
@@ -39,13 +34,22 @@ public class SunriseSunset implements Runnable {
 
     /**
      *
-     * @return
+     * @return Lat
+     * @throws ClassNotFoundException
+     * @throws SQLException
      */
-    private String getUrl() throws ClassNotFoundException, SQLException {
-        String url = "http://api.sunrise-sunset.org/json?formatted=0";
-        url += "&lat=" + dao.getValue("sunrise_sunset", "lat");
-        url += "&lng=" + dao.getValue("sunrise_sunset", "lng");
-        return url;
+    private double getLat() throws ClassNotFoundException, SQLException {
+        return Double.parseDouble(dao.getValue("sunrise_sunset", "lat"));
+    }
+
+    /**
+     *
+     * @return Lng
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
+    private double getLng() throws ClassNotFoundException, SQLException {
+        return Double.parseDouble(dao.getValue("sunrise_sunset", "lng"));
     }
 
     /**
@@ -69,15 +73,17 @@ public class SunriseSunset implements Runnable {
      */
     @Override
     public void run() {
-        String url;
         String name;
         String pin;
+        double lat, lng;
 
         try {
-            url = getUrl();
             name = getName();
             pin = getPin();
+            lat = getLat();
+            lng = getLng();
         } catch (ClassNotFoundException | SQLException ex) {
+            ex.printStackTrace();
             return;
         }
 
@@ -89,27 +95,25 @@ public class SunriseSunset implements Runnable {
                 /**
                  * Today
                  */
-                String responseToday = HttpClient
-                        .get(url + "&date=today");
+                GregorianCalendar today = new GregorianCalendar();
 
-                SunriseBase base = GSON.fromJson(responseToday,
-                        SunriseBase.class);
+                GregorianCalendar[] riseSet = getRiseSet(today, lat, lng);
 
-                dates[0] = SDF.parse(base.getResults().getSunrise());
+                dates[0] = riseSet[0].getTime();
 
-                dates[1] = SDF.parse(base.getResults().getCivilTwilightEnd());
+                dates[1] = riseSet[1].getTime();
 
                 /**
                  * Tomorrow
                  */
-                String responseTomorrow = HttpClient
-                        .get(url + "&date=tomorrow");
+                GregorianCalendar tomorrow = new GregorianCalendar();
+                tomorrow.add(Calendar.DAY_OF_MONTH, 1);
 
-                base = GSON.fromJson(responseTomorrow, SunriseBase.class);
+                riseSet = getRiseSet(today, lat, lng);
 
-                dates[2] = SDF.parse(base.getResults().getSunrise());
+                dates[2] = riseSet[0].getTime();
 
-                dates[3] = SDF.parse(base.getResults().getCivilTwilightEnd());
+                dates[3] = riseSet[1].getTime();
 
                 /**
                  * Calc
@@ -166,4 +170,70 @@ public class SunriseSunset implements Runnable {
             }
         }
     }
+
+    /**
+     *
+     * @param calendar
+     * @param lat
+     * @param lng
+     * @return
+     */
+    private GregorianCalendar[] getRiseSet(GregorianCalendar calendar,
+            double lat, double lng) {
+
+        double n = calendar.get(Calendar.DAY_OF_YEAR);
+
+        double f = calendar.getTimeZone().getOffset(calendar.getTimeInMillis())
+                / 1000.0 / 60.0 / 60.0;
+
+        double sigma = 23.45 * Math.sin(Math.toRadians(360.0 / 365.0
+                * (284.0 + n)));
+
+        double T = 2.0 / 15.0 * Math.toDegrees(Math.acos(
+                -(Math.tan(Math.toRadians(lat))
+                * Math.tan(Math.toRadians(sigma)))));
+
+        double halfT = T / 2.0;
+
+        double clng = (Math.abs(lng) - Math.abs(f * 15.0)) / 15.0;
+
+        double rise = 12.0 - halfT + clng;
+
+        GregorianCalendar sunrise = new GregorianCalendar();
+        sunrise.setTime(calendar.getTime());
+
+        double floor = Math.floor(rise);
+        sunrise.set(Calendar.HOUR_OF_DAY, (int) floor);
+
+        rise = (rise - floor) * 60.0;
+        floor = Math.floor(rise);
+
+        sunrise.set(Calendar.MINUTE, (int) floor);
+
+        rise = (rise - floor) * 60.0;
+        floor = Math.floor(rise);
+
+        sunrise.set(Calendar.SECOND, (int) floor);
+
+        double set = 12.0 + halfT + clng;
+
+        GregorianCalendar sunset = new GregorianCalendar();
+        sunset.setTime(calendar.getTime());
+
+        floor = Math.floor(set);
+        sunset.set(Calendar.HOUR_OF_DAY, (int) floor);
+
+        set = (set - floor) * 60.0;
+        floor = Math.floor(set);
+
+        sunset.set(Calendar.MINUTE, (int) floor);
+
+        set = (set - floor) * 60.0;
+        floor = Math.floor(set);
+
+        sunset.set(Calendar.SECOND, (int) floor);
+
+        return new GregorianCalendar[]{sunrise, sunset};
+    }
+
 }
