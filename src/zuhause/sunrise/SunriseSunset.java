@@ -5,11 +5,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.db.PairDao;
 import zuhause.util.Config;
-import zuhause.util.ServerLog;
 import zuhause.ws.ApiArduino;
 
 /**
@@ -25,7 +26,7 @@ public class SunriseSunset implements Runnable {
     private static final SimpleDateFormat LOC
             = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
-    private static final ServerLog SERVERLOG = ServerLog.getInstance();
+    private static final Logger LOGGER = LogManager.getRootLogger();
 
     private static final TelegramBot BOT
             = Config.getTelegramBot("zuhause_iot_bot");
@@ -54,7 +55,9 @@ public class SunriseSunset implements Runnable {
 
     /**
      *
-     * @return
+     * @return Name
+     * @throws ClassNotFoundException
+     * @throws SQLException
      */
     private String getName() throws ClassNotFoundException, SQLException {
         return dao.getValue("sunrise_sunset", "name");
@@ -75,7 +78,8 @@ public class SunriseSunset implements Runnable {
     public void run() {
         String name;
         String pin;
-        double lat, lng;
+        double lat;
+        double lng;
 
         try {
             name = getName();
@@ -83,7 +87,7 @@ public class SunriseSunset implements Runnable {
             lat = getLat();
             lng = getLng();
         } catch (ClassNotFoundException | SQLException ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage(), ex);
             return;
         }
 
@@ -109,7 +113,7 @@ public class SunriseSunset implements Runnable {
                 GregorianCalendar tomorrow = new GregorianCalendar();
                 tomorrow.add(Calendar.DAY_OF_MONTH, 1);
 
-                riseSet = getRiseSet(today, lat, lng);
+                riseSet = getRiseSet(tomorrow, lat, lng);
 
                 dates[2] = riseSet[0].getTime();
 
@@ -138,7 +142,7 @@ public class SunriseSunset implements Runnable {
                         + (useDate % 2 == 1 ? "acender" : "apagar")
                         + " às " + LOC.format(dates[useDate]) + ".";
 
-                SERVERLOG.msg(-1, msg);
+                LOGGER.info(msg);
 
                 if (!DEBUG) {
                     BOT.sendMessage(msg);
@@ -153,18 +157,18 @@ public class SunriseSunset implements Runnable {
                 msg = "A luz " + name + " foi "
                         + (useDate % 2 == 1 ? "acesa." : "apagada.");
 
-                SERVERLOG.msg(-1, msg);
+                LOGGER.info(msg);
 
                 if (!DEBUG) {
                     BOT.sendMessage(msg);
                 }
 
             } catch (Exception ex) {
-                ex.printStackTrace();
+                LOGGER.error(ex.getMessage(), ex);
                 try {
                     Thread.sleep(300000); // 5 min
-                } catch (Exception ex1) {
-                    ex1.printStackTrace();
+                } catch (Exception exx) {
+                    LOGGER.error(exx.getMessage(), exx);
                     break;
                 }
             }
@@ -227,6 +231,9 @@ public class SunriseSunset implements Runnable {
         floor = Math.floor(set);
 
         sunset.set(Calendar.MINUTE, (int) floor);
+
+        // Sunset delay.
+        sunset.add(Calendar.MINUTE, 15);
 
         set = (set - floor) * 60.0;
         floor = Math.floor(set);

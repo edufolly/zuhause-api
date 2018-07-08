@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.router.Router;
@@ -19,6 +21,7 @@ import zuhause.serial.Serial;
  */
 public class Config {
 
+    private static final Logger LOGGER = LogManager.getRootLogger();
     private transient boolean debug;
     private int tcpPort;
     private int maxConnections;
@@ -67,7 +70,7 @@ public class Config {
                         out.write(json.getBytes());
                     }
                 } catch (Exception exx) {
-                    ex.printStackTrace();
+                    LOGGER.error(exx.getMessage(), exx);
                 }
             }
         }

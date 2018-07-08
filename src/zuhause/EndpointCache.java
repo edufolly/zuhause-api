@@ -1,6 +1,14 @@
 package zuhause;
 
-import zuhause.annotations.*;
+import zuhause.annotations.Path;
+import zuhause.annotations.WS;
+import zuhause.annotations.GET;
+import zuhause.annotations.PUT;
+import zuhause.annotations.POST;
+import zuhause.annotations.DELETE;
+import zuhause.annotations.PATCH;
+import zuhause.annotations.COPY;
+import zuhause.annotations.HEAD;
 import zuhause.util.Config;
 import zuhause.util.Request;
 import com.google.common.reflect.ClassPath;

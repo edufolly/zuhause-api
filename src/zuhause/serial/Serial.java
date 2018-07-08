@@ -5,13 +5,16 @@ import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
-import zuhause.util.ServerLog;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
  * @author Eduardo Folly
  */
 public class Serial implements Serializable {
+
+    private static final Logger LOGGER = LogManager.getRootLogger();
 
     private String dev;
     private int baundrate;
@@ -154,14 +157,14 @@ public class Serial implements Serializable {
         long start = System.currentTimeMillis();
         while (!sb.toString().contains(wait)) {
             if (System.currentTimeMillis() - start >= timeout) {
-                System.out.println(sb.toString());
+                LOGGER.debug(sb.toString());
                 throw new SerialPortException(serialPort
                         .getPortName(), "waitFor", "Timeout");
             }
             try {
                 Thread.sleep(sleep);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                LOGGER.error(ex.getMessage(), ex);
             }
         }
         return sb.toString();
@@ -191,7 +194,7 @@ public class Serial implements Serializable {
                             .readString(event.getEventValue());
                     sb.append(receivedData);
                 } catch (SerialPortException ex) {
-                    ServerLog.getInstance().erro(-1, ex);
+                    LOGGER.error(ex.getMessage(), ex);
                 }
             }
         }

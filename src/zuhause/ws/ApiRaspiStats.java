@@ -45,6 +45,8 @@ public class ApiRaspiStats {
     public List<Map<String, Object>> ramGet()
             throws IOException, InterruptedException {
 
+        // TODO - Problema pode acontecer aqui. Talvez somente "free" resolva.
+        
         return TerminalHelper.execute("free -o");
     }
 
@@ -59,6 +61,8 @@ public class ApiRaspiStats {
     public List<Map<String, Object>> topGet()
             throws IOException, InterruptedException {
 
+        // TODO - Problema pode acontecer aqui. Verificar como fazer o comando.
+        
         return TerminalHelper.execute("top -bn1w1024", 6);
     }
 

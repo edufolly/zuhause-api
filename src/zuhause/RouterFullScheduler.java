@@ -1,6 +1,7 @@
 package zuhause;
 
-import zuhause.util.ServerLog;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zuhause.ws.ApiRouter;
 
 /**
@@ -9,7 +10,7 @@ import zuhause.ws.ApiRouter;
  */
 public class RouterFullScheduler implements Runnable {
 
-    private static final ServerLog LOG = ServerLog.getInstance();
+    private static final Logger LOGGER = LogManager.getRootLogger();
 
     /**
      *
@@ -20,9 +21,9 @@ public class RouterFullScheduler implements Runnable {
         try {
             new ApiRouter().getFullConfig();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage(), ex);
         }
 
-        LOG.msg(0, "RouterFullScheduler");
+        LOGGER.info("RouterFullScheduler");
     }
 }

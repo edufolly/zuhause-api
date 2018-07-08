@@ -2,13 +2,14 @@ package zuhause;
 
 import java.util.List;
 import java.util.Set;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.db.Pair;
 import zuhause.db.PairDao;
 import zuhause.util.BooleanUtil;
 import zuhause.util.Config;
-import zuhause.util.ServerLog;
 import zuhause.ws.ApiRouter;
 
 /**
@@ -27,7 +28,7 @@ public class RouterScheduler implements Runnable {
     private static final DbConfig DB_CONFIG
             = Config.getDbConfig("localhost");
 
-    private static final ServerLog LOG = ServerLog.getInstance();
+    private static final Logger LOGGER = LogManager.getRootLogger();
 
     private static final TelegramBot BOT
             = Config.getTelegramBot("zuhause_iot_bot");
@@ -71,15 +72,20 @@ public class RouterScheduler implements Runnable {
                         dao.insert("mac_status", mac, BooleanUtil
                                 .toString(ativo));
 
-                        BOT.sendMessage(pair.getValue()
+                        String msg = pair.getValue()
                                 + (ativo ? " chegou em" : " saiu de")
-                                + " casa.");
+                                + " casa.";
+
+                        BOT.sendMessage(msg);
+
+                        LOGGER.info(msg);
                     }
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage(), ex);
         }
-        LOG.msg(0, "RouterScheduler");
+
+        LOGGER.info("RouterScheduler");
     }
 }

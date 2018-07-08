@@ -9,12 +9,12 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
-import zuhause.util.Config;
 import zuhause.util.HttpStatus;
 import zuhause.util.InvokableException;
-import zuhause.util.ServerLog;
 import zuhause.util.Request;
 import zuhause.util.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -22,7 +22,7 @@ import zuhause.util.Response;
  */
 public class ApiServer extends Thread {
 
-    private static final boolean DEBUG = Config.getInstance().isDebug();
+    private static final Logger LOGGER = LogManager.getRootLogger();
     private static final Locale LOCALE = new Locale("en", "US");
     private static final SimpleDateFormat SDF
             = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", LOCALE);
@@ -46,23 +46,19 @@ public class ApiServer extends Thread {
      */
     @Override
     public void run() {
-        ServerLog serverlog = ServerLog.getInstance();
-
         Request request;
 
         Response response = null;
         assert response != null;
 
         try {
-            if (DEBUG) {
-                serverlog.conectado(this.hashCode(),
-                        connectedClient.getInetAddress(),
-                        connectedClient.getPort());
-            }
-
-            request = new Request(connectedClient.getInputStream());
+            LOGGER.info("Conectado: {}:{}",
+                    connectedClient.getInetAddress(),
+                    connectedClient.getPort());
 
             response = new Response(connectedClient.getOutputStream());
+
+            request = new Request(connectedClient.getInputStream());
 
             Invokable invokable = EndpointCache.find(request);
 
@@ -75,7 +71,7 @@ public class ApiServer extends Thread {
             response = invokable.invoke(request, response);
 
         } catch (Exception ex) {
-            serverlog.erro(this.hashCode(), ex);
+            LOGGER.error(ex.getMessage(), ex);
             try {
                 response.setHttpStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
                 StringWriter sw = new StringWriter();
@@ -85,7 +81,7 @@ public class ApiServer extends Thread {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 response.setBody(gson.toJson(erro));
             } catch (Exception exx) {
-                exx.printStackTrace();
+                LOGGER.error(exx.getMessage(), exx);
             }
         } finally {
             try {
@@ -93,12 +89,10 @@ public class ApiServer extends Thread {
                 response.addHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
                 response.flush();
             } catch (Exception exx) {
-                exx.printStackTrace();
+                LOGGER.error(exx.getMessage(), exx);
             }
 
-            if (DEBUG) {
-                serverlog.desconectado(this.hashCode());
-            }
+            LOGGER.info("Desconectado.");
         }
     }
 

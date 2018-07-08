@@ -9,11 +9,12 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zuhause.db.DbConfig;
 import zuhause.db.Pair;
 import zuhause.db.PairDao;
 import zuhause.util.Config;
-import zuhause.util.ServerLog;
 import zuhause.ws.ApiArduino;
 
 /**
@@ -27,14 +28,13 @@ public class TelegramBot implements Serializable, Runnable {
     private String token;
     private String name;
 
+    private static final Logger LOGGER = LogManager.getRootLogger();
+
     private static final transient OkHttpClient CLIENT
             = Config.getHttpClient();
 
     private transient static final DbConfig DB_CONFIG
             = Config.getDbConfig("localhost");
-
-    private transient static final ServerLog LOG
-            = ServerLog.getInstance();
 
     private transient static final Gson GSON = new Gson();
 
@@ -86,7 +86,7 @@ public class TelegramBot implements Serializable, Runnable {
 
             resp = get(url);
 
-            LOG.msg(999, resp);
+            LOGGER.info(resp);
         }
 
         return !resp.isEmpty();
@@ -140,7 +140,7 @@ public class TelegramBot implements Serializable, Runnable {
                  */
                 if (!updates.isEmpty()) {
                     for (Update update : updates) {
-                        LOG.msg(update.getId(), update.getMessage().getText());
+                        LOGGER.info(update.getMessage().getText());
 
                         if (update.getMessage().getText()
                                 .equalsIgnoreCase("temperatura")) {
@@ -158,10 +158,10 @@ public class TelegramBot implements Serializable, Runnable {
                     dao.saveOrUpdate(pair);
                 }
             } else {
-                LOG.msg(-1, "TelegramBot - ERRO: " + ret);
+                LOGGER.error("TelegramBot: {}", ret);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage(), ex);
         }
     }
 }

@@ -1,4 +1,7 @@
 #!/bin/sh
 
-nohup java -jar dist/Zuhause.jar > sout.log 2>&1&
+cd /opt/projects/zuhause-api/
+
+nohup java -jar dist/zuhause-api.jar > /dev/null 2>&1&
+
 echo $! > save_pid.txt
