@@ -6,6 +6,8 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import jssc.SerialPortException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import zuhause.annotations.GET;
 import zuhause.annotations.Path;
 import zuhause.serial.Serial;
@@ -18,6 +20,8 @@ import zuhause.util.Config;
  */
 @Path("/api")
 public class ApiArduino {
+
+    private static final Logger LOGGER = LogManager.getRootLogger();
 
     private static final Map<String, Boolean> STATUS = new HashMap();
 
@@ -142,18 +146,20 @@ public class ApiArduino {
      * @throws SerialPortException
      */
     private String todosReles(Boolean bool) throws SerialPortException {
-        STATUS.clear();
-        int toInt = BooleanUtil.toInt(bool);
+        int status = BooleanUtil.toInt(bool);
         for (String pino : PINOS) {
             try {
-                ARDUINO.write("$D" + pino + toInt + "#");
-                ARDUINO.waitFor("}");
+                acionarDigital(pino, status);
             } catch (Exception ex) {
 
             }
         }
-        return "OK!";
 
+        for (String pin : STATUS.keySet()) {
+            STATUS.put(pin, bool);
+        }
+
+        return "{\"s\": 200}";
     }
 
     /**
@@ -181,11 +187,30 @@ public class ApiArduino {
     public Map<String, Object> acionarDigital(String chave, String pino,
             Boolean status) throws SerialPortException {
 
-        ARDUINO.write("$D" + pino + BooleanUtil.toInt(status) + "#");
-        String temp = ARDUINO.waitFor("}");
+        String temp = acionarDigital(pino, BooleanUtil.toInt(status));
         STATUS.put(chave, status);
         Map<String, Object> map = GSON.fromJson(temp, TYPE);
         return map;
     }
 
+    /**
+     *
+     * @param pino
+     * @param status
+     * @return
+     * @throws SerialPortException
+     */
+    private String acionarDigital(String pino, int status) {
+        String ret = "{\"s\": 500}";
+        try {
+            String cmd = "$D" + pino + status + "#";
+            LOGGER.info("Arduino Serial: {}", cmd);
+            ARDUINO.write(cmd);
+            ret = ARDUINO.waitFor("}");
+            LOGGER.info("Arduino Serial: {}", ret);
+        } catch (SerialPortException ex) {
+            LOGGER.warn("Erro na comunicação com o Arduino.", ex);
+        }
+        return ret;
+    }
 }
