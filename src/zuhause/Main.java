@@ -45,8 +45,9 @@ public class Main {
         int porta = -1;
 
         try {
+            Config.getInstance().setDebug(debug);
+
             Config config = Config.getInstance();
-            config.setDebug(debug);
 
             porta = config.getTcpPort();
 
