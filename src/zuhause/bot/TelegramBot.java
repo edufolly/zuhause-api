@@ -64,30 +64,31 @@ public class TelegramBot implements Serializable, Runnable {
      *
      * @param text
      * @return boolean
-     * @throws Exception
      */
-    public Boolean sendMessage(String text) throws Exception {
+    public Boolean sendMessage(String text) {
         String resp = "";
+        try {
+            if (send_to != null) {
+                for (String send : send_to) {
+                    HttpUrl url = new HttpUrl.Builder()
+                            .scheme(scheme)
+                            .host(host)
+                            .addPathSegment("bot" + token)
+                            .addPathSegment("sendMessage")
+                            .addQueryParameter("chat_id", send)
+                            .addQueryParameter("text", text)
+                            .build();
 
-        if (send_to != null) {
-            for (String send : send_to) {
-                HttpUrl url = new HttpUrl.Builder()
-                        .scheme(scheme)
-                        .host(host)
-                        .addPathSegment("bot" + token)
-                        .addPathSegment("sendMessage")
-                        .addQueryParameter("chat_id", send)
-                        .addQueryParameter("text", text)
-                        .build();
+                    resp = get(url);
 
-                resp = get(url);
-
-                LOGGER.info(resp);
+                    LOGGER.info(resp);
+                }
+            } else {
+                LOGGER.warn("Telegram não configurado.");
             }
-        } else {
-            LOGGER.warn("Telegram não configurado.");
+        } catch (Exception ex) {
+            LOGGER.warn("Mensagem não enviada.", ex);
         }
-
         return !resp.isEmpty();
     }
 
@@ -96,11 +97,11 @@ public class TelegramBot implements Serializable, Runnable {
      */
     @Override
     public void run() {
-        PairDao dao = new PairDao(DB_CONFIG);
-
-        ApiArduino apiArduino = new ApiArduino();
-
         try {
+            PairDao dao = new PairDao(DB_CONFIG);
+
+            ApiArduino apiArduino = new ApiArduino();
+
             List<Pair> p = dao.select("`tab` = ? AND `key` = ?",
                     new String[]{"telegram_bot", name},
                     "`when` DESC", "1");

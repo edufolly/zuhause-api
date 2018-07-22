@@ -51,6 +51,11 @@ public class Main {
 
             porta = config.getTcpPort();
 
+            ServerSocket server = new ServerSocket(porta,
+                    config.getMaxConnections());
+
+            logger.info("API Server aguardando conexões na porta {}.", porta);
+
             EndpointCache.init();
 
             try {
@@ -61,11 +66,11 @@ public class Main {
 
             // TODO - Implementar configurável.
             SCHEDULER.scheduleAtFixedRate(new TempScheduler(),
-                    0, 5, TimeUnit.MINUTES);
+                    1, 5, TimeUnit.MINUTES);
 
             SCHEDULER.scheduleWithFixedDelay(Config
                     .getTelegramBot("default"),
-                    10, 30, TimeUnit.SECONDS);
+                    30, 30, TimeUnit.SECONDS);
 
             if (!Config.isDebug()) {
                 Config.getTelegramBot("default")
@@ -85,21 +90,16 @@ public class Main {
 //            SCHEDULER.scheduleAtFixedRate(new RouterScheduler(),
 //                    0, 1, TimeUnit.MINUTES);
 //
-            ServerSocket server = new ServerSocket(porta,
-                    config.getMaxConnections());
-
-            logger.info("API Server aguardando conexões na porta {}.", porta);
-
             while (true) {
                 Socket connection = server.accept();
                 (new ApiServer(connection)).start();
             }
         } catch (java.net.BindException ex) {
-            logger.error("A porta {} está em uso por outro programa. ({})",
+            logger.fatal("A porta {} está em uso por outro programa. ({})",
                     porta, ex.getMessage());
             System.exit(0);
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            logger.fatal(ex.getMessage(), ex);
             System.exit(0);
         }
 

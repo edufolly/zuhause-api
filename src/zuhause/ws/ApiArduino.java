@@ -43,8 +43,7 @@ public class ApiArduino {
     @Path("/temp/interna")
     @GET
     public Map<String, Object> getTempInterna() throws SerialPortException {
-        ARDUINO.write("$T00#");
-        String temp = ARDUINO.waitFor("}");
+        String temp = executaComando("$T00#");
         Map<String, Object> map = GSON.fromJson(temp, TYPE);
         return map;
     }
@@ -201,12 +200,29 @@ public class ApiArduino {
      * @throws SerialPortException
      */
     private String acionarDigital(String pino, int status) {
+        return executaComando("$D" + pino + status + "#");
+    }
+
+    /**
+     *
+     * @param cmd
+     * @return
+     */
+    private String executaComando(String cmd) {
+        return executaComando(cmd, "}");
+    }
+
+    /**
+     *
+     * @param cmd
+     * @return
+     */
+    private String executaComando(String cmd, String waitFor) {
         String ret = "{\"s\": 500}";
         try {
-            String cmd = "$D" + pino + status + "#";
             LOGGER.info("Arduino Serial: {}", cmd);
             ARDUINO.write(cmd);
-            ret = ARDUINO.waitFor("}");
+            ret = ARDUINO.waitFor(waitFor);
             LOGGER.info("Arduino Serial: {}", ret);
         } catch (SerialPortException ex) {
             LOGGER.warn("Erro na comunicação com o Arduino.", ex);
