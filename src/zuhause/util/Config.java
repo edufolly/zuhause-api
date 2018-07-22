@@ -23,7 +23,7 @@ import zuhause.sunrise.SunriseSunset;
 public class Config {
 
     private static final Logger LOGGER = LogManager.getRootLogger();
-    private transient boolean debug;
+    private static boolean DEBUG = false;
     private int tcpPort;
     private int maxConnections;
     private String appPackage;
@@ -33,7 +33,7 @@ public class Config {
     private Map<String, TelegramBot> telegramBotConfigs;
     private Map<String, SunriseSunset> sunriseSunsetConfigs;
     //--
-    private static final transient OkHttpClient CLIENT
+    private static final OkHttpClient CLIENT
             = new OkHttpClient.Builder()
                     .connectTimeout(10, TimeUnit.SECONDS)
                     .writeTimeout(10, TimeUnit.SECONDS)
@@ -126,16 +126,16 @@ public class Config {
      *
      * @return
      */
-    public boolean isDebug() {
-        return debug;
+    public static boolean isDebug() {
+        return DEBUG;
     }
 
     /**
      *
-     * @param debug
+     * @param dbg
      */
-    public void setDebug(boolean debug) {
-        this.debug = debug;
+    public static void setDebug(boolean dbg) {
+        DEBUG = dbg;
     }
 
     /**

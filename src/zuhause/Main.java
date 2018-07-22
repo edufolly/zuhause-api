@@ -42,11 +42,11 @@ public class Main {
 
         Logger logger = LogManager.getRootLogger();
 
+        Config.setDebug(debug);
+
         int porta = -1;
 
         try {
-            Config.getInstance().setDebug(debug);
-
             Config config = Config.getInstance();
 
             porta = config.getTcpPort();
@@ -67,7 +67,7 @@ public class Main {
                     .getTelegramBot("default"),
                     10, 30, TimeUnit.SECONDS);
 
-            if (!config.isDebug()) {
+            if (!Config.isDebug()) {
                 Config.getTelegramBot("default")
                         .sendMessage("Zuhause iniciada.");
             }

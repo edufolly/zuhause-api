@@ -17,8 +17,6 @@ import zuhause.ws.ApiArduino;
  */
 public class SunriseSunset implements Serializable, Runnable {
 
-    private static final boolean DEBUG = Config.getInstance().isDebug();
-
     private static final SimpleDateFormat LOC
             = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
@@ -90,7 +88,7 @@ public class SunriseSunset implements Serializable, Runnable {
 
                 LOGGER.info(msg);
 
-                if (!DEBUG) {
+                if (!Config.isDebug()) {
                     BOT.sendMessage(msg);
                 }
 
@@ -105,7 +103,7 @@ public class SunriseSunset implements Serializable, Runnable {
 
                 LOGGER.info(msg);
 
-                if (!DEBUG) {
+                if (!Config.isDebug()) {
                     BOT.sendMessage(msg);
                 }
 
