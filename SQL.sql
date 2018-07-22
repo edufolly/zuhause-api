@@ -1,6 +1,8 @@
-CREATE DATABASE zuhause
+CREATE DATABASE `zuhause`
     CHARACTER SET = utf8
-    COLLATE = utf8_bin
+    COLLATE = utf8_bin;
+
+USE `zuhause`;
 
 CREATE TABLE `pairs` ( 
     `id` Int( 11 ) AUTO_INCREMENT NOT NULL,
