@@ -1,10 +1,19 @@
-CREATE TABLE `pairs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tab` varchar(50) CHARACTER SET utf8 NOT NULL,
-  `key` varchar(50) COLLATE utf8_bin NOT NULL,
-  `value` varchar(50) COLLATE utf8_bin DEFAULT NULL,
-  `when` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `KEY_WHEN` (`when`,`tab`,`key`),
-  KEY `KEY_TAB` (`tab`,`key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+CREATE DATABASE zuhause
+    CHARACTER SET = utf8
+    COLLATE = utf8_bin
+
+CREATE TABLE `pairs` ( 
+    `id` Int( 11 ) AUTO_INCREMENT NOT NULL,
+    `tab` VarChar( 50 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    `key` VarChar( 50 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+    `value` VarChar( 50 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
+    `when` Timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ( `id` ) )
+CHARACTER SET = utf8
+COLLATE = utf8_bin
+ENGINE = InnoDB;
+
+CREATE INDEX `KEY_TAB` USING BTREE ON `pairs`( `tab`, `key` );
+
+CREATE INDEX `KEY_WHEN` USING BTREE ON `pairs`( `when`, `tab`, `key` );
+
