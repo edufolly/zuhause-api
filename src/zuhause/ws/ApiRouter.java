@@ -29,7 +29,7 @@ public class ApiRouter {
     private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
 
     private static final TelegramBot BOT
-            = Config.getTelegramBot("zuhause_iot_bot");
+            = Config.getTelegramBot("default");
 
     private final PairDao dao = new PairDao(DB_CONFIG);
 

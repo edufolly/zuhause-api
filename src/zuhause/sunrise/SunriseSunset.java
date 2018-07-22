@@ -1,6 +1,6 @@
 package zuhause.sunrise;
 
-import java.sql.SQLException;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,8 +8,6 @@ import java.util.GregorianCalendar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import zuhause.bot.TelegramBot;
-import zuhause.db.DbConfig;
-import zuhause.db.PairDao;
 import zuhause.util.Config;
 import zuhause.ws.ApiArduino;
 
@@ -17,11 +15,9 @@ import zuhause.ws.ApiArduino;
  *
  * @author Eduardo Folly
  */
-public class SunriseSunset implements Runnable {
+public class SunriseSunset implements Serializable, Runnable {
 
     private static final boolean DEBUG = Config.getInstance().isDebug();
-
-    private static final DbConfig DB_CONFIG = Config.getDbConfig("localhost");
 
     private static final SimpleDateFormat LOC
             = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -29,68 +25,18 @@ public class SunriseSunset implements Runnable {
     private static final Logger LOGGER = LogManager.getRootLogger();
 
     private static final TelegramBot BOT
-            = Config.getTelegramBot("zuhause_iot_bot");
+            = Config.getTelegramBot("default");
 
-    private final PairDao dao = new PairDao(DB_CONFIG);
-
-    /**
-     *
-     * @return Lat
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     */
-    private double getLat() throws ClassNotFoundException, SQLException {
-        return Double.parseDouble(dao.getValue("sunrise_sunset", "lat"));
-    }
-
-    /**
-     *
-     * @return Lng
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     */
-    private double getLng() throws ClassNotFoundException, SQLException {
-        return Double.parseDouble(dao.getValue("sunrise_sunset", "lng"));
-    }
-
-    /**
-     *
-     * @return Name
-     * @throws ClassNotFoundException
-     * @throws SQLException
-     */
-    private String getName() throws ClassNotFoundException, SQLException {
-        return dao.getValue("sunrise_sunset", "name");
-    }
-
-    /**
-     *
-     * @return
-     */
-    private String getPin() throws ClassNotFoundException, SQLException {
-        return dao.getValue("sunrise_sunset", "pin");
-    }
+    private double lat;
+    private double lng;
+    private String name;
+    private String pin;
 
     /**
      *
      */
     @Override
     public void run() {
-        String name;
-        String pin;
-        double lat;
-        double lng;
-
-        try {
-            name = getName();
-            pin = getPin();
-            lat = getLat();
-            lng = getLng();
-        } catch (ClassNotFoundException | SQLException ex) {
-            LOGGER.error(ex.getMessage(), ex);
-            return;
-        }
-
         while (true) {
             try {
 
@@ -134,7 +80,7 @@ public class SunriseSunset implements Runnable {
                 }
 
                 if (useDate < 0) {
-                    System.out.println("Erro na utilização de datas.");
+                    LOGGER.warn("Erro na utilização de datas.");
                     break;
                 }
 

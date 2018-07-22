@@ -63,10 +63,19 @@ public class Main {
                     0, 5, TimeUnit.MINUTES);
 
             SCHEDULER.scheduleWithFixedDelay(Config
-                    .getTelegramBot("zuhause_iot_bot"),
+                    .getTelegramBot("default"),
                     10, 30, TimeUnit.SECONDS);
 
-            new Thread(new SunriseSunset()).start();
+            if (!config.isDebug()) {
+                Config.getTelegramBot("default")
+                        .sendMessage("Zuhause iniciada.");
+            }
+
+            for (SunriseSunset sunriseSunset : config
+                    .getSunriseSunsetConfigs().values()) {
+
+                new Thread(sunriseSunset).start();
+            }
 
 //            Desativado
 //            SCHEDULER.scheduleWithFixedDelay(new RouterFullScheduler(),
@@ -80,17 +89,13 @@ public class Main {
 
             logger.info("API Server aguardando conexões na porta {}.", porta);
 
-            if (!config.isDebug()) {
-                Config.getTelegramBot("zuhause_iot_bot")
-                        .sendMessage("Zuhause iniciada.");
-            }
-
             while (true) {
                 Socket connection = server.accept();
                 (new ApiServer(connection)).start();
             }
         } catch (java.net.BindException ex) {
-            logger.error("A porta {} está em uso por outro programa. ({})", porta, ex.getMessage());
+            logger.error("A porta {} está em uso por outro programa. ({})",
+                    porta, ex.getMessage());
             System.exit(0);
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);

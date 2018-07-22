@@ -31,7 +31,7 @@ public class RouterScheduler implements Runnable {
     private static final Logger LOGGER = LogManager.getRootLogger();
 
     private static final TelegramBot BOT
-            = Config.getTelegramBot("zuhause_iot_bot");
+            = Config.getTelegramBot("default");
 
     /**
      *

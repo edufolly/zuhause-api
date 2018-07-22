@@ -27,12 +27,14 @@ public class TempScheduler implements Runnable {
         ApiArduino apiArduino = new ApiArduino();
 
         // Interna
+        String t = "-1";
         try {
             Map<String, Object> map = apiArduino.getTempInterna();
-            dao.insert("temp", "interna", map.get("t").toString());
+            t = map.get("t").toString();
+            dao.insert("temp", "interna", t);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
         }
-        LOGGER.info("TempScheduler");
+        LOGGER.info("TempScheduler: {}ºC", t);
     }
 }

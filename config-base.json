@@ -28,11 +28,20 @@
         }
     },
     "telegramBotConfigs": {
-        "my_name_bot": {
+        "default": {
             "scheme": "https",
             "host": "api.telegram.org",
             "token": "123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi",
-            "name": "my_name_bot"
+            "name": "my_name_bot",
+            "send_to" : ["123456789"]
+        }
+    },
+    "sunriseSunsetConfigs": {
+        "nome": {
+            "lat": -20.10,
+            "lng": -40.40,
+            "name": "jardim",
+            "pin": "1"
         }
     }
 }

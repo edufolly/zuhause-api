@@ -27,6 +27,7 @@ public class TelegramBot implements Serializable, Runnable {
     private String host;
     private String token;
     private String name;
+    private String[] send_to;
 
     private static final Logger LOGGER = LogManager.getRootLogger();
 
@@ -66,27 +67,25 @@ public class TelegramBot implements Serializable, Runnable {
      * @throws Exception
      */
     public Boolean sendMessage(String text) throws Exception {
-        PairDao dao = new PairDao(DB_CONFIG);
-
-        List<Pair> p = dao.select("`tab` = ? AND `key` = ?",
-                new String[]{"telegram_bot", "send_to"});
-
         String resp = "";
 
-        for (Pair pair : p) {
+        if (send_to != null) {
+            for (String send : send_to) {
+                HttpUrl url = new HttpUrl.Builder()
+                        .scheme(scheme)
+                        .host(host)
+                        .addPathSegment("bot" + token)
+                        .addPathSegment("sendMessage")
+                        .addQueryParameter("chat_id", send)
+                        .addQueryParameter("text", text)
+                        .build();
 
-            HttpUrl url = new HttpUrl.Builder()
-                    .scheme(scheme)
-                    .host(host)
-                    .addPathSegment("bot" + token)
-                    .addPathSegment("sendMessage")
-                    .addQueryParameter("chat_id", pair.getValue())
-                    .addQueryParameter("text", text)
-                    .build();
+                resp = get(url);
 
-            resp = get(url);
-
-            LOGGER.info(resp);
+                LOGGER.info(resp);
+            }
+        } else {
+            LOGGER.warn("Telegram não configurado.");
         }
 
         return !resp.isEmpty();

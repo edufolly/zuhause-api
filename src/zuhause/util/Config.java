@@ -14,6 +14,7 @@ import zuhause.bot.TelegramBot;
 import zuhause.db.DbConfig;
 import zuhause.router.Router;
 import zuhause.serial.Serial;
+import zuhause.sunrise.SunriseSunset;
 
 /**
  *
@@ -30,6 +31,7 @@ public class Config {
     private Map<String, Serial> serialConfigs;
     private Map<String, Router> routerConfigs;
     private Map<String, TelegramBot> telegramBotConfigs;
+    private Map<String, SunriseSunset> sunriseSunsetConfigs;
     //--
     private static final transient OkHttpClient CLIENT
             = new OkHttpClient.Builder()
@@ -249,4 +251,21 @@ public class Config {
 
         this.telegramBotConfigs = telegramBotConfigs;
     }
+
+    /**
+     *
+     * @return
+     */
+    public Map<String, SunriseSunset> getSunriseSunsetConfigs() {
+        return sunriseSunsetConfigs;
+    }
+
+    /**
+     *
+     * @param sunriseSunsetConfigs
+     */
+    public void setSunriseSunsetConfigs(Map<String, SunriseSunset> sunriseSunsetConfigs) {
+        this.sunriseSunsetConfigs = sunriseSunsetConfigs;
+    }
+
 }
