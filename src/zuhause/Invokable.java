@@ -8,7 +8,6 @@ import zuhause.annotations.BodyParam;
 import zuhause.annotations.PathParam;
 import zuhause.annotations.QueryStringParam;
 import zuhause.util.Request;
-import com.google.gson.Gson;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -21,6 +20,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import zuhause.annotations.ReturnType;
+import zuhause.util.Config;
 import zuhause.util.HttpStatus;
 import zuhause.util.Response;
 
@@ -32,9 +32,6 @@ public class Invokable {
 
     private static final transient Pattern PATTERN_PARAM
             = Pattern.compile(":([^/]+?)/");
-
-    private static final transient Gson GSON = new Gson();
-
     //--
     private final Class clazz;
     private final Method method;
@@ -138,8 +135,8 @@ public class Invokable {
                         i++;
                     }
                 } else if (annotationType.equals(BodyParam.class)) {
-                    objects[i] = GSON.fromJson(String.valueOf(request
-                            .getBody()).trim(), parameterTypes[i]);
+                    objects[i] = Config.getGson().fromJson(String.valueOf(
+                            request.getBody()).trim(), parameterTypes[i]);
                     i++;
                 } else if (annotationType.equals(ReturnType.class)) {
                     mediaType = ((ReturnType) annotation).value().mediaType;
@@ -168,7 +165,7 @@ public class Invokable {
                 response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
                         "GET, POST, PUT, DELETE, OPTIONS, HEAD");
 
-                body = GSON.toJson(invoked);
+                body = Config.getGson().toJson(invoked);
             } else {
                 response.addHeader(HttpHeaders.CONTENT_TYPE,
                         mediaType.toString());

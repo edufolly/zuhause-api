@@ -30,7 +30,7 @@ public class ApiArduino {
 
     private static final Serial ARDUINO = Config.getSerial("arduino");
 
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = Config.getGson();
 
     private static final Type TYPE = new TypeToken< Map<String, Object>>() {
     }.getType();

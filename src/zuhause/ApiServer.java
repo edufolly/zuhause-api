@@ -1,8 +1,6 @@
 package zuhause;
 
 import com.google.common.net.HttpHeaders;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.Socket;
@@ -15,6 +13,7 @@ import zuhause.util.Request;
 import zuhause.util.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import zuhause.util.Config;
 
 /**
  *
@@ -78,8 +77,7 @@ public class ApiServer extends Thread {
                 PrintWriter pw = new PrintWriter(sw);
                 ex.printStackTrace(pw);
                 Erro erro = new Erro(ex.getMessage(), sw.toString());
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                response.setBody(gson.toJson(erro));
+                response.setBody(Config.getGson().toJson(erro));
             } catch (Exception exx) {
                 LOGGER.error(exx.getMessage(), exx);
             }
