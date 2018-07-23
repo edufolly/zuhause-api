@@ -221,7 +221,7 @@ public class ApiArduino {
         String ret = "{\"s\": 500}";
         try {
             LOGGER.info("Arduino Serial: {}", cmd);
-            ARDUINO.write(cmd);
+            ARDUINO.safeWrite(cmd);
             ret = ARDUINO.waitFor(waitFor);
             LOGGER.info("Arduino Serial: {}", ret);
         } catch (SerialPortException ex) {

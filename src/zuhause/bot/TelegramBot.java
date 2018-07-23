@@ -1,12 +1,10 @@
 package zuhause.bot;
 
-import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
@@ -31,14 +29,6 @@ public class TelegramBot implements Serializable, Runnable {
 
     private static final Logger LOGGER = LogManager.getRootLogger();
 
-    private static final transient OkHttpClient CLIENT
-            = Config.getHttpClient();
-
-    private transient static final DbConfig DB_CONFIG
-            = Config.getDbConfig("localhost");
-
-    private transient static final Gson GSON = new Gson();
-
     /**
      *
      * @param url
@@ -52,10 +42,13 @@ public class TelegramBot implements Serializable, Runnable {
                 .addHeader("cache-control", "no-cache")
                 .build();
 
-        try (Response response = CLIENT.newCall(request).execute()) {
+        try (Response response = Config.getHttpClient().newCall(request)
+                .execute()) {
+
             if (!response.isSuccessful()) {
                 throw new IOException("Unexpected code " + response);
             }
+
             return response.body().string();
         }
     }
@@ -98,7 +91,9 @@ public class TelegramBot implements Serializable, Runnable {
     @Override
     public void run() {
         try {
-            PairDao dao = new PairDao(DB_CONFIG);
+            DbConfig dbConfig = Config.getDbConfig("localhost");
+
+            PairDao dao = new PairDao(dbConfig);
 
             ApiArduino apiArduino = new ApiArduino();
 
@@ -129,7 +124,7 @@ public class TelegramBot implements Serializable, Runnable {
 
             String ret = get(url);
 
-            Result result = GSON.fromJson(ret, Result.class);
+            Result result = Config.getGson().fromJson(ret, Result.class);
 
             if (result.isOk()) {
 

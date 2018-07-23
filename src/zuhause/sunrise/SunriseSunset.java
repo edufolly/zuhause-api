@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import zuhause.bot.TelegramBot;
 import zuhause.util.Config;
 import zuhause.ws.ApiArduino;
 
@@ -21,9 +20,6 @@ public class SunriseSunset implements Serializable, Runnable {
             = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
     private static final Logger LOGGER = LogManager.getRootLogger();
-
-    private static final TelegramBot BOT
-            = Config.getTelegramBot("default");
 
     private double lat;
     private double lng;
@@ -89,7 +85,7 @@ public class SunriseSunset implements Serializable, Runnable {
                 LOGGER.info(msg);
 
                 if (!Config.isDebug()) {
-                    BOT.sendMessage(msg);
+                    Config.getTelegramBot("default").sendMessage(msg);
                 }
 
                 new ApiArduino().acionarDigital(name, pin, (useDate % 2) == 0);
@@ -104,7 +100,7 @@ public class SunriseSunset implements Serializable, Runnable {
                 LOGGER.info(msg);
 
                 if (!Config.isDebug()) {
-                    BOT.sendMessage(msg);
+                    Config.getTelegramBot("default").sendMessage(msg);
                 }
 
             } catch (Exception ex) {

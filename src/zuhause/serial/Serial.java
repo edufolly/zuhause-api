@@ -27,6 +27,7 @@ public class Serial implements Serializable {
 
     private transient SerialPort serialPort = null;
     private transient StringBuilder sb = new StringBuilder();
+    private transient boolean running = false;
 
     /**
      *
@@ -110,9 +111,47 @@ public class Serial implements Serializable {
 
     /**
      *
+     */
+    private void clear() {
+        sb = new StringBuilder();
+    }
+
+    /**
+     *
+     * @param message
      * @throws SerialPortException
      */
-    private void init() throws SerialPortException {
+    public void safeWrite(String message) throws SerialPortException {
+        long start = System.currentTimeMillis();
+        while (running) {
+            if (System.currentTimeMillis() - start >= timeout) {
+                throw new SerialPortException(serialPort
+                        .getPortName(), "safeWrite", "Timeout");
+            }
+            try {
+                Thread.sleep(sleep);
+            } catch (Exception ex) {
+                LOGGER.error("Break sleep", ex);
+                throw new SerialPortException(serialPort
+                        .getPortName(), "safeWrite", "Break sleep");
+            }
+        }
+        write(message);
+    }
+
+    /**
+     *
+     * @param message
+     * @throws SerialPortException
+     */
+    private void write(String message) throws SerialPortException {
+        if (running) {
+            throw new SerialPortException(serialPort.getPortName(),
+                    "write", "Already running");
+        }
+
+        running = true;
+
         if (serialPort == null) {
             serialPort = new SerialPort(dev);
 
@@ -128,22 +167,7 @@ public class Serial implements Serializable {
         }
 
         clear();
-    }
 
-    /**
-     *
-     */
-    private void clear() {
-        sb = new StringBuilder();
-    }
-
-    /**
-     *
-     * @param message
-     * @throws SerialPortException
-     */
-    public void write(String message) throws SerialPortException {
-        init();
         serialPort.writeString(message);
     }
 
@@ -157,16 +181,21 @@ public class Serial implements Serializable {
         long start = System.currentTimeMillis();
         while (!sb.toString().contains(wait)) {
             if (System.currentTimeMillis() - start >= timeout) {
-                LOGGER.debug(sb.toString());
+                System.out.println(sb.toString());
+                clear();
+                running = false;
                 throw new SerialPortException(serialPort
                         .getPortName(), "waitFor", "Timeout");
             }
             try {
                 Thread.sleep(sleep);
             } catch (Exception ex) {
-                LOGGER.error(ex.getMessage(), ex);
+                LOGGER.error("Break sleep", ex);
+                throw new SerialPortException(serialPort
+                        .getPortName(), "waitFor", "Break sleep");
             }
         }
+        running = false;
         return sb.toString();
     }
 

@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
@@ -20,7 +21,7 @@ import zuhause.sunrise.SunriseSunset;
  *
  * @author Eduardo Folly
  */
-public class Config {
+public class Config implements Serializable {
 
     private static final Logger LOGGER = LogManager.getRootLogger();
     private static boolean DEBUG = false;
@@ -40,7 +41,24 @@ public class Config {
                     .readTimeout(10, TimeUnit.SECONDS)
                     .build();
     //--
-    private static transient Config INSTANCE = null;
+    private static final Gson GSON = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
+    //--
+    private static final Config INSTANCE;
+
+    /**
+     *
+     */
+    static {
+        FileReader fileReader = null;
+        try {
+            fileReader = new FileReader("config.json");
+        } catch (Exception ex) {
+            LOGGER.fatal("Arquivo config.json não encontrado.", ex);
+        }
+        INSTANCE = GSON.fromJson(fileReader, Config.class);
+    }
 
     /**
      *
@@ -54,28 +72,15 @@ public class Config {
      *
      * @return
      */
+    public static Gson getGson() {
+        return GSON;
+    }
+
+    /**
+     *
+     * @return
+     */
     public static Config getInstance() {
-        if (INSTANCE == null) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            try {
-                INSTANCE = gson.fromJson(new FileReader("config.json"),
-                        Config.class);
-            } catch (FileNotFoundException ex) {
-                INSTANCE = new Config();
-                INSTANCE.setTcpPort(8088);
-                INSTANCE.setMaxConnections(5);
-                INSTANCE.setAppPackage("zuhause.ws");
-                try {
-                    String json = gson.toJson(INSTANCE);
-                    try (FileOutputStream out
-                            = new FileOutputStream("config.json")) {
-                        out.write(json.getBytes());
-                    }
-                } catch (Exception exx) {
-                    LOGGER.error(exx.getMessage(), exx);
-                }
-            }
-        }
         return INSTANCE;
     }
 
@@ -85,7 +90,7 @@ public class Config {
      * @return
      */
     public static DbConfig getDbConfig(String config) {
-        return Config.getInstance().getDbConfigs().get(config);
+        return INSTANCE.getDbConfigs().get(config);
     }
 
     /**
@@ -94,7 +99,7 @@ public class Config {
      * @return
      */
     public static Serial getSerial(String serial) {
-        return Config.getInstance().getSerialConfigs().get(serial);
+        return INSTANCE.getSerialConfigs().get(serial);
     }
 
     /**
@@ -104,7 +109,7 @@ public class Config {
      * @throws Exception
      */
     public static Router getRouter(String router) throws Exception {
-        return Config.getInstance().getRouterConfigs().get(router).parse();
+        return INSTANCE.getRouterConfigs().get(router).parse();
     }
 
     /**
@@ -113,13 +118,7 @@ public class Config {
      * @return
      */
     public static TelegramBot getTelegramBot(String bot) {
-        return Config.getInstance().getTelegramBotConfigs().get(bot);
-    }
-
-    /**
-     *
-     */
-    private Config() {
+        return INSTANCE.getTelegramBotConfigs().get(bot);
     }
 
     /**
@@ -136,6 +135,13 @@ public class Config {
      */
     public static void setDebug(boolean dbg) {
         DEBUG = dbg;
+    }
+
+    /**
+     *
+     */
+    private Config() {
+
     }
 
     /**
