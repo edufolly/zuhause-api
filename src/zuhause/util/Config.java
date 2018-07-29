@@ -2,10 +2,11 @@ package zuhause.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
@@ -23,8 +24,19 @@ import zuhause.sunrise.SunriseSunset;
  */
 public class Config implements Serializable {
 
+    private static final Map<String, String> OS = new HashMap();
     private static final Logger LOGGER = LogManager.getRootLogger();
     private static boolean DEBUG = false;
+    private static final Gson GSON = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
+    private static final OkHttpClient CLIENT
+            = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
+                    .build();
+    //--
     private int tcpPort;
     private int maxConnections;
     private String appPackage;
@@ -34,23 +46,27 @@ public class Config implements Serializable {
     private Map<String, TelegramBot> telegramBotConfigs;
     private Map<String, SunriseSunset> sunriseSunsetConfigs;
     //--
-    private static final OkHttpClient CLIENT
-            = new OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .build();
-    //--
-    private static final Gson GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
-    //--
     private static final Config INSTANCE;
 
     /**
      *
      */
     static {
+        try {
+            File file = new File("/etc/os-release");
+            BufferedReader b = new BufferedReader(new FileReader(file));
+
+            String readLine;
+
+            while ((readLine = b.readLine()) != null) {
+                String[] p = readLine.split("=");
+                OS.put(p[0], p[1].replaceAll("\"", ""));
+            }
+        } catch (Exception ex) {
+            LOGGER.error("Não foi possível obter informações do sistema "
+                    + "operacional.", ex);
+        }
+
         FileReader fileReader = null;
         try {
             fileReader = new FileReader("config.json");
@@ -74,6 +90,14 @@ public class Config implements Serializable {
      */
     public static Gson getGson() {
         return GSON;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public static int getOsVersionId() {
+        return Integer.parseInt(OS.getOrDefault("VERSION_ID", "-1"));
     }
 
     /**

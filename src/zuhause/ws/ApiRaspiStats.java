@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import zuhause.annotations.GET;
 import zuhause.annotations.Path;
+import zuhause.util.Config;
 import zuhause.util.DateUtil;
 import zuhause.util.TerminalHelper;
 
@@ -20,6 +21,18 @@ import zuhause.util.TerminalHelper;
 @Path("/api/raspi")
 public class ApiRaspiStats {
 
+    /**
+     * 
+     * @return JSON
+     */
+    @Path("/osversion") 
+    @GET
+    public Map<String, Object> osVersionGet() {
+        Map<String, Object> map = new HashMap();
+        map.put("os_version", Config.getOsVersionId());
+        return map;
+    }
+    
     /**
      *
      * @return JSON
