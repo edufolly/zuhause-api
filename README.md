@@ -42,7 +42,7 @@ $ sudo chown pi:pi projects/
 $ ls -la
 ```
 
-To verify if the folder was created with success, the `ls -la` command must return:
+To verify if the folder was created with success, the `ls -la | grep projects` command must return:
 
 `drwxr-xr-x  2 pi   pi   4096 May 21 02:12 projects`
 
