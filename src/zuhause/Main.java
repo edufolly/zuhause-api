@@ -3,13 +3,14 @@ package zuhause;
 import zuhause.util.Config;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import zuhause.sunrise.SunriseSunset;
-import zuhause.ws.ApiArduino;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import zuhause.serial.Serial;
 
 /**
  *
@@ -49,6 +50,13 @@ public class Main {
         try {
             Config config = Config.getInstance();
 
+            Map<String, Serial> serialConfigs = config.getSerialConfigs();
+            for (String name : serialConfigs.keySet()) {
+                Serial serial = serialConfigs.get(name);
+                logger.info("Abrindo serial {} em {}.", name, serial.getDev());
+                serial.open();
+            }
+
             porta = config.getTcpPort();
 
             ServerSocket server = new ServerSocket(porta,
@@ -57,12 +65,6 @@ public class Main {
             logger.info("API Server aguardando conexões na porta {}.", porta);
 
             EndpointCache.init();
-
-            try {
-                new ApiArduino().getTempInterna();
-            } catch (Exception ex) {
-
-            }
 
             // TODO - Implementar configurável.
             SCHEDULER.scheduleAtFixedRate(new TempScheduler(),

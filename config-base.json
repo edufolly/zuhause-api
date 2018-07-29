@@ -16,7 +16,9 @@
             "baundrate": 9600,
             "databits": 8,
             "stopbits": 1,
-            "parity": 0
+            "parity": 0,
+            "timeout": 5000,
+            "sleep": 50
         }
     },
     "routerConfigs": {
@@ -33,7 +35,7 @@
             "host": "api.telegram.org",
             "token": "123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi",
             "name": "my_name_bot",
-            "send_to" : ["123456789"]
+            "send_to": ["123456789"]
         }
     },
     "sunriseSunsetConfigs": {

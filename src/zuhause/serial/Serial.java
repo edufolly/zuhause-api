@@ -21,9 +21,8 @@ public class Serial implements Serializable {
     private int databits;
     private int stopbits;
     private int parity;
-
-    private final long timeout = 5000;
-    private final long sleep = 50;
+    private long timeout;
+    private long sleep;
 
     private transient SerialPort serialPort = null;
     private transient StringBuilder sb = new StringBuilder();
@@ -122,6 +121,7 @@ public class Serial implements Serializable {
      * @throws SerialPortException
      */
     public void safeWrite(String message) throws SerialPortException {
+        open();
         long start = System.currentTimeMillis();
         while (running) {
             if (System.currentTimeMillis() - start >= timeout) {
@@ -136,38 +136,8 @@ public class Serial implements Serializable {
                         .getPortName(), "safeWrite", "Break sleep");
             }
         }
-        write(message);
-    }
-
-    /**
-     *
-     * @param message
-     * @throws SerialPortException
-     */
-    private void write(String message) throws SerialPortException {
-        if (running) {
-            throw new SerialPortException(serialPort.getPortName(),
-                    "write", "Already running");
-        }
-
         running = true;
-
-        if (serialPort == null) {
-            serialPort = new SerialPort(dev);
-
-            serialPort.openPort();
-
-            serialPort.setParams(baundrate, databits, stopbits, parity);
-
-            serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN
-                    | SerialPort.FLOWCONTROL_RTSCTS_OUT);
-
-            serialPort.addEventListener(new PortReader(),
-                    SerialPort.MASK_RXCHAR);
-        }
-
         clear();
-
         serialPort.writeString(message);
     }
 
@@ -197,6 +167,63 @@ public class Serial implements Serializable {
         }
         running = false;
         return sb.toString();
+    }
+
+    /**
+     *
+     * @param time
+     */
+    private void block(final long time) {
+        running = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(time);
+                } catch (Exception ex) {
+                    LOGGER.warn("Break start", ex);
+                }
+                running = false;
+            }
+        }).start();
+    }
+
+    /**
+     *
+     */
+    public void open() {
+        try {
+            if (serialPort == null) {
+                serialPort = new SerialPort(dev);
+
+                serialPort.openPort();
+
+                serialPort.setParams(baundrate, databits, stopbits, parity);
+
+                serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN
+                        | SerialPort.FLOWCONTROL_RTSCTS_OUT);
+
+                serialPort.addEventListener(new PortReader(),
+                        SerialPort.MASK_RXCHAR);
+
+                block(Math.min(sleep * sleep, timeout - 500l));
+            }
+        } catch (Exception ex) {
+            LOGGER.error("Trying to open " + dev, ex);
+        }
+    }
+
+    /**
+     *
+     */
+    public void close() {
+        try {
+            if (serialPort != null) {
+                serialPort.closePort();
+            }
+        } catch (Exception ex) {
+            LOGGER.warn("Erro ao fechar a porta " + dev + ".", ex);
+        }
     }
 
     /**
