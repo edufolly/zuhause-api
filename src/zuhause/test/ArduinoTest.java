@@ -58,30 +58,30 @@ public class ArduinoTest extends AbstractTest {
             if (s instanceof Double) {
                 Double d = (Double) s;
                 if (d != 200.0) {
-                    throw new Exception("s diferente de 200.");
+                    throw new TestErrorException("s diferente de 200.");
                 }
             } else {
-                throw new Exception("s não é double.");
+                throw new TestErrorException("s não é double.");
             }
 
             Object t = map.get("t");
             if (t instanceof Double) {
                 Double d = (Double) t;
                 if (d < 5 || d > 45) {
-                    throw new Exception("t < 5 ou t > 45.");
+                    throw new TestErrorException("t < 5 ou t > 45.");
                 }
             } else {
-                throw new Exception("t não é double.");
+                throw new TestErrorException("t não é double.");
             }
 
             Object h = map.get("h");
             if (h instanceof Double) {
                 Double d = (Double) h;
                 if (d < 20 || d > 50) {
-                    throw new Exception("h < 20 ou h > 50.");
+                    throw new TestErrorException("h < 20 ou h > 50.");
                 }
             } else {
-                throw new Exception("h não é double.");
+                throw new TestErrorException("h não é double.");
             }
         } catch (Exception ex) {
             error(ex, map);

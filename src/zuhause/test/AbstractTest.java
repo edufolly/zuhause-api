@@ -66,11 +66,11 @@ public abstract class AbstractTest implements Runnable {
      */
     public void notEmptyList(List list) throws Exception {
         if (list == null) {
-            throw new Exception("Lista null.");
+            throw new TestErrorException("Lista null.");
         }
 
         if (list.isEmpty()) {
-            throw new Exception("Lista vazia.");
+            throw new TestErrorException("Lista vazia.");
         }
     }
 
@@ -81,11 +81,11 @@ public abstract class AbstractTest implements Runnable {
      */
     public void notEmptyMap(Map map) throws Exception {
         if (map == null) {
-            throw new Exception("Map null.");
+            throw new TestErrorException("Map null.");
         }
 
         if (map.isEmpty()) {
-            throw new Exception("Map vazio.");
+            throw new TestErrorException("Map vazio.");
         }
     }
 

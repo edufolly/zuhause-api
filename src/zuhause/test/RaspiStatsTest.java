@@ -11,7 +11,7 @@ import zuhause.ws.ApiRaspiStats;
  */
 public class RaspiStatsTest extends AbstractTest {
 
-    ApiRaspiStats api = new ApiRaspiStats();
+    private final ApiRaspiStats api = new ApiRaspiStats();
 
     /**
      *
