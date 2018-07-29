@@ -22,17 +22,17 @@ import zuhause.util.TerminalHelper;
 public class ApiRaspiStats {
 
     /**
-     * 
+     *
      * @return JSON
      */
-    @Path("/osversion") 
+    @Path("/osversion")
     @GET
     public Map<String, Object> osVersionGet() {
         Map<String, Object> map = new HashMap();
         map.put("os_version", Config.getOsVersionId());
         return map;
     }
-    
+
     /**
      *
      * @return JSON
@@ -58,9 +58,11 @@ public class ApiRaspiStats {
     public List<Map<String, Object>> ramGet()
             throws IOException, InterruptedException {
 
-        // TODO - Problema pode acontecer aqui. Talvez somente "free" resolva.
-        
-        return TerminalHelper.execute("free -o");
+        if (Config.getOsVersionId() < 9) {
+            return TerminalHelper.execute("free -o");
+        } else {
+            return TerminalHelper.execute("free");
+        }
     }
 
     /**
@@ -74,9 +76,7 @@ public class ApiRaspiStats {
     public List<Map<String, Object>> topGet()
             throws IOException, InterruptedException {
 
-        // TODO - Problema pode acontecer aqui. Verificar como fazer o comando.
-        
-        return TerminalHelper.execute("top -bn1w1024", 6);
+        return TerminalHelper.execute("top -b -n1 -w1024", 6);
     }
 
     /**

@@ -11,6 +11,9 @@ import zuhause.sunrise.SunriseSunset;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import zuhause.serial.Serial;
+import zuhause.test.AbstractTest;
+import zuhause.test.ArduinoTest;
+import zuhause.test.RaspiStatsTest;
 
 /**
  *
@@ -28,9 +31,15 @@ public class Main {
     public static void main(String[] args) {
 
         boolean debug = false;
+        boolean test = false;
 
         for (String arg : args) {
             if ("--debug".equals(arg)) {
+                debug = true;
+            }
+
+            if ("--test".equals(arg)) {
+                test = true;
                 debug = true;
             }
         }
@@ -44,6 +53,24 @@ public class Main {
         Logger logger = LogManager.getRootLogger();
 
         Config.setDebug(debug);
+
+        if (test) {
+            logger.info("Iniciando Testes...");
+
+            new ArduinoTest(logger).run();
+            new RaspiStatsTest(logger).run();
+            // TODO - Testes nos bancos de dados.
+
+            logger.info("Testes Finalizados.");
+
+            if (!AbstractTest.passed()) {
+                logger.info("Verifique os erros acima.");
+                System.exit(500);
+            } else {
+                logger.info("Não foram encontrados erros.");
+                System.exit(0);
+            }
+        }
 
         int porta = -1;
 
