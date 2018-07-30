@@ -38,10 +38,10 @@ public class RaspiStatsTest extends AbstractTest {
         try {
             list = api.diskGet();
 
-            notEmptyList(list);
+            listNotEmpty(list);
 
             // TODO - Realizar mais teste.
-            // MapUtil.print(logger, list);
+            // print(list);
         } catch (Exception ex) {
             error(ex, list);
         }
@@ -55,10 +55,17 @@ public class RaspiStatsTest extends AbstractTest {
         try {
             list = api.ramGet();
 
-            notEmptyList(list);
+            listSizeEqual(list, 1);
 
-            // TODO - Realizar mais teste.
-            // MapUtil.print(logger, list);
+            Map map = list.get(0);
+
+            mapHasKey(map, "shared");
+            mapHasKey(map, "total");
+            mapHasKey(map, "available");
+            mapHasKey(map, "used");
+            mapHasKey(map, "free");
+            mapHasKey(map, "buff/cache");
+
         } catch (Exception ex) {
             error(ex, list);
         }

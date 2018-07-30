@@ -38,7 +38,56 @@ public class ArduinoTest extends AbstractTest {
             Serial serial = serialConfigs.get(name);
             serial.open();
             executaTesteTemperatura(serial);
+            executaTestePino(serial, "3");
+            executaTestePino(serial, "4");
+            executaTestePino(serial, "5");
+            executaTestePino(serial, "6");
+            executaTestePino(serial, "7");
+            executaTestePino(serial, "8");
+            executaTestePino(serial, "9");
+            executaTestePino(serial, "A");
+            executaTestePino(serial, "B");
+            executaTestePino(serial, "C");
+            executaTestePino(serial, "D");
             serial.close();
+        }
+    }
+
+    /**
+     *
+     * @param serial
+     * @param pino
+     */
+    private void executaTestePino(Serial serial, String pino) {
+
+        Map<String, Object> map = null;
+
+        String comando = "$D" + pino + "1#";
+
+        try {
+            String ret = executaComando(serial, comando, "}");
+            map = gson.fromJson(ret, TYPE);
+            mapNotEmpty(map);
+            mapEqual(map, "s", 200.0);
+            mapEqual(map, "m", "D");
+            mapEqual(map, "p", pino);
+            mapEqual(map, "v", 1.0);
+        } catch (Exception ex) {
+            error(ex, map);
+        }
+
+        comando = "$D" + pino + "0#";
+
+        try {
+            String ret = executaComando(serial, comando, "}");
+            map = gson.fromJson(ret, TYPE);
+            mapNotEmpty(map);
+            mapEqual(map, "s", 200.0);
+            mapEqual(map, "m", "D");
+            mapEqual(map, "p", pino);
+            mapEqual(map, "v", 0.0);
+        } catch (Exception ex) {
+            error(ex, map);
         }
     }
 
@@ -52,41 +101,13 @@ public class ArduinoTest extends AbstractTest {
             String ret = executaComando(serial, "$T00#", "}");
             map = gson.fromJson(ret, TYPE);
 
-            notEmptyMap(map);
-
-            Object s = map.get("s");
-            if (s instanceof Double) {
-                Double d = (Double) s;
-                if (d != 200.0) {
-                    throw new TestErrorException("s diferente de 200.");
-                }
-            } else {
-                throw new TestErrorException("s não é double.");
-            }
-
-            Object t = map.get("t");
-            if (t instanceof Double) {
-                Double d = (Double) t;
-                if (d < 5 || d > 45) {
-                    throw new TestErrorException("t < 5 ou t > 45.");
-                }
-            } else {
-                throw new TestErrorException("t não é double.");
-            }
-
-            Object h = map.get("h");
-            if (h instanceof Double) {
-                Double d = (Double) h;
-                if (d < 20 || d > 50) {
-                    throw new TestErrorException("h < 20 ou h > 50.");
-                }
-            } else {
-                throw new TestErrorException("h não é double.");
-            }
+            mapNotEmpty(map);
+            mapEqual(map, "s", 200.0);
+            mapBetweenExclusive(map, "t", 5.0, 45.0);
+            mapBetweenExclusive(map, "h", 20.0, 70.0);
         } catch (Exception ex) {
             error(ex, map);
         }
-
     }
 
     /**
