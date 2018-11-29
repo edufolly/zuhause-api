@@ -37,6 +37,7 @@ public class Config implements Serializable {
                     .readTimeout(10, TimeUnit.SECONDS)
                     .build();
     //--
+    private String cache;
     private int tcpPort;
     private int maxConnections;
     private String appPackage;
@@ -166,6 +167,22 @@ public class Config implements Serializable {
      */
     private Config() {
 
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String getCache() {
+        return cache;
+    }
+
+    /**
+     *
+     * @param cache
+     */
+    public void setCache(String cache) {
+        this.cache = cache;
     }
 
     /**

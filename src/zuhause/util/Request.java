@@ -1,11 +1,13 @@
 package zuhause.util;
 
+import com.google.common.hash.Hashing;
 import com.google.common.net.HttpHeaders;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,9 +23,10 @@ public class Request {
     private String httpMethod;
     private String path;
     private String protocol;
+    private String rawqs = "";
     private Map<String, String> queryString;
     private Map<String, String> headers;
-    private char[] body;
+    private String body;
 
     /**
      *
@@ -66,20 +69,18 @@ public class Request {
             String[] p = line.split(":", 2);
 
             if (p.length > 1) {
-                headers.put(p[0], p[1].trim());
+                headers.put(p[0].toLowerCase(), p[1].trim());
             }
         }
 
         if (requestArray.isEmpty()) {
-            throw new MalformedRequestException("Request String vazia. "
-                    + "Conexão recusada.");
+            throw new MalformedRequestException("Request String empty. Connection refused.");
         }
 
         String[] stline = requestArray.get(0).split(" ");
 
         if (stline.length < 3) {
-            throw new MalformedRequestException("Padrões do protocolo "
-                    + "HTTP não contemplados.");
+            throw new MalformedRequestException("HTTP protocol standards not applied.");
         }
 
         httpMethod = stline[0];
@@ -88,9 +89,8 @@ public class Request {
 
         String[] split = path.split("\\?", 2);
 
-        String qs = "";
         if (split.length == 2) {
-            qs = split[1];
+            rawqs = split[1];
         }
 
         path = split[0];
@@ -104,7 +104,7 @@ public class Request {
         }
 
         queryString = new HashMap();
-        for (String s : qs.split("&")) {
+        for (String s : rawqs.split("&")) {
             String[] splt = s.split("=", 2);
             String key = URLDecoder.decode(splt[0], "UTF-8");
             String value = null;
@@ -114,20 +114,28 @@ public class Request {
             queryString.put(key, value);
         }
 
-        if (headers.containsKey(HttpHeaders.CONTENT_LENGTH)) {
+        if (headers.containsKey(HttpHeaders.CONTENT_LENGTH.toLowerCase())) {
             int length = Integer.parseInt(headers
-                    .get(HttpHeaders.CONTENT_LENGTH));
+                    .get(HttpHeaders.CONTENT_LENGTH.toLowerCase()));
             long start = System.currentTimeMillis();
-            body = new char[length];
+            char[] raw = new char[length];
             int readed = 0;
             while (readed < length) {
                 if (System.currentTimeMillis() - start > timeout) {
                     throw new TimeoutException("Content length incomplete ("
                             + readed + "/" + length + ").");
                 }
-                int read = inFromClient.read(body, readed, length - readed);
-                readed += read;
+                if (inFromClient.ready()) {
+                    int read = inFromClient.read(raw, readed, length - readed);
+                    if (read < 1) {
+                        break;
+                    }
+                    readed += read;
+                } else {
+                    break;
+                }
             }
+            body = String.valueOf(raw).trim();
         }
     }
 
@@ -175,7 +183,7 @@ public class Request {
      *
      * @return
      */
-    public char[] getBody() {
+    public String getBody() {
         return body;
     }
 
@@ -205,4 +213,75 @@ public class Request {
     public boolean containsQueryString(String key) {
         return queryString.containsKey(key);
     }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("===== REQUEST =====\n");
+
+        sb.append("Protocol: ");
+        sb.append(getProtocol());
+        sb.append("\n");
+
+        sb.append("Path: ");
+        sb.append(getPath());
+        sb.append("\n");
+
+        sb.append("Method: ");
+        sb.append(getHttpMethod());
+        sb.append("\n");
+
+        sb.append("Headers: \n");
+
+        for (String key : headers.keySet()) {
+            sb.append("\t");
+            sb.append(key);
+            sb.append(" => ");
+            sb.append(headers.get(key));
+            sb.append("\n");
+        }
+
+        sb.append("Query String: \n");
+
+        for (String key : queryString.keySet()) {
+            sb.append("\t");
+            sb.append(key);
+            sb.append(" => ");
+            sb.append(queryString.get(key));
+            sb.append("\n");
+        }
+
+        if (body != null) {
+            sb.append("Body:\n");
+            if (body.isEmpty()) {
+                sb.append("<EMPTY>");
+            } else {
+                sb.append(body);
+            }
+        }
+
+        return sb.toString();
+
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String getHash() {
+        StringBuilder base = new StringBuilder();
+        base.append(getProtocol());
+        base.append(getHttpMethod());
+        base.append(getPath());
+        base.append(rawqs);
+        base.append(body);
+
+        return Hashing.goodFastHash(16)
+                .hashString(base.toString(), StandardCharsets.UTF_8)
+                .toString();
+    }
+
 }

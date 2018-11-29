@@ -1,6 +1,7 @@
 package zuhause;
 
 import com.google.common.net.HttpHeaders;
+import com.google.gson.Gson;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.Socket;
@@ -8,12 +9,11 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 import zuhause.util.HttpStatus;
-import zuhause.util.InvokableException;
 import zuhause.util.Request;
 import zuhause.util.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import zuhause.util.Config;
+import zuhause.util.Firewall;
 
 /**
  *
@@ -45,13 +45,27 @@ public class ApiServer extends Thread {
      */
     @Override
     public void run() {
-        Request request;
+        try {
+            if (!Firewall.run(connectedClient.getInetAddress())) {
+                LOGGER.warn("Conexão bloqueada: {}:{}",
+                        connectedClient.getInetAddress(),
+                        connectedClient.getPort());
+
+                connectedClient.close();
+                return;
+            }
+        } catch (Exception ex) {
+            LOGGER.error("Erro ao encerrar conexão negada pelo firewall.", ex);
+            return;
+        }
+
+        Request request = null;
 
         Response response = null;
         assert response != null;
 
         try {
-            LOGGER.info("Conectado: {}:{}",
+            LOGGER.trace("Conectado: {}:{}",
                     connectedClient.getInetAddress(),
                     connectedClient.getPort());
 
@@ -62,36 +76,64 @@ public class ApiServer extends Thread {
             Invokable invokable = EndpointCache.find(request);
 
             if (invokable == null) {
-                throw new InvokableException("Endpoint não encontrado.\n"
-                        + "HTTP Method: " + request.getHttpMethod()
+                throw new Exception("Endpoint não encontrado. "
+                        + "Method: " + request.getHttpMethod()
                         + " - Path: " + request.getPath());
             }
 
-            response = invokable.invoke(request, response);
+            String body = invokable.invoke(request, response);
 
+            if (body == null) {
+                response.clearHeaders();
+                response.setHttpStatus(HttpStatus.SC_NO_CONTENT);
+            } else {
+                response.setHttpStatus(HttpStatus.SC_OK);
+                response.setBody(body);
+            }
+
+            response.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+
+            response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+
+            response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
+                    "origin, content-type, accept, authorization");
+
+            response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS,
+                    "true");
+
+            response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
+                    "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH, COPY");
         } catch (Exception ex) {
-            LOGGER.error(ex.getMessage(), ex);
+            LOGGER.error(connectedClient.getInetAddress() + ":"
+                    + connectedClient.getPort(), ex);
+
+            if (request != null) {
+                LOGGER.debug(request);
+            }
+
             try {
                 response.setHttpStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 ex.printStackTrace(pw);
-                Erro erro = new Erro(ex.getMessage(), sw.toString());
-                response.setBody(Config.getGson().toJson(erro));
+                Erro erro = new Erro(ex.getMessage(), sw.toString(), request);
+                Gson gson = new Gson();
+                response.setBody(gson.toJson(erro));
             } catch (Exception exx) {
                 LOGGER.error(exx.getMessage(), exx);
             }
         } finally {
             try {
-                response.addHeader(HttpHeaders.SERVER, "Zuhause API Server");
-                response.addHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
-                response.flush();
+                if (request != null) {
+                    response.addHeader(HttpHeaders.SERVER, "Gigalink API Server");
+                    response.flush();
+                }
             } catch (Exception exx) {
                 LOGGER.error(exx.getMessage(), exx);
             }
-
-            LOGGER.info("Desconectado.");
         }
+
+        LOGGER.trace("Desconectado.");
     }
 
     /**
@@ -101,13 +143,15 @@ public class ApiServer extends Thread {
 
         private String mensagem;
         private String stacktrace;
+        private Request request;
 
         public Erro() {
         }
 
-        public Erro(String mensagem, String stacktrace) {
+        public Erro(String mensagem, String stacktrace, Request request) {
             this.mensagem = mensagem;
             this.stacktrace = stacktrace;
+            this.request = request;
         }
 
         public String getMensagem() {
@@ -125,5 +169,14 @@ public class ApiServer extends Thread {
         public void setStacktrace(String stacktrace) {
             this.stacktrace = stacktrace;
         }
+
+        public Request getRequest() {
+            return request;
+        }
+
+        public void setRequest(Request request) {
+            this.request = request;
+        }
+
     }
 }

@@ -1,27 +1,30 @@
 package zuhause;
 
-import zuhause.util.InvokableException;
-import com.google.common.base.Strings;
-import com.google.common.net.HttpHeaders;
-import com.google.common.net.MediaType;
-import zuhause.annotations.BodyParam;
-import zuhause.annotations.PathParam;
-import zuhause.annotations.QueryStringParam;
-import zuhause.util.Request;
+import com.google.gson.Gson;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import zuhause.annotations.ReturnType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import zuhause.annotations.BodyParam;
+import zuhause.annotations.PathParam;
+import zuhause.annotations.QueryStringParam;
 import zuhause.util.Config;
-import zuhause.util.HttpStatus;
+import zuhause.util.InvokableException;
+import zuhause.util.Request;
 import zuhause.util.Response;
 
 /**
@@ -30,12 +33,14 @@ import zuhause.util.Response;
  */
 public class Invokable {
 
-    private static final transient Pattern PATTERN_PARAM
-            = Pattern.compile(":([^/]+?)/");
+    private static final Logger LOGGER = LogManager.getRootLogger();
+    private static final transient Pattern PATTERN = Pattern.compile(":([^/]+?)/");
+    private static final transient Gson GSON = new Gson();
     //--
     private final Class clazz;
     private final Method method;
     private final Pattern pattern;
+    private final long cacheTime;
     private String[] params;
 
     /**
@@ -44,15 +49,17 @@ public class Invokable {
      * @param method
      * @param endpoint
      * @param pattern
+     * @param cacheTime
      */
     public Invokable(Class clazz, Method method, String endpoint,
-            Pattern pattern) {
+            Pattern pattern, long cacheTime) {
 
         this.clazz = clazz;
         this.method = method;
         this.pattern = pattern;
+        this.cacheTime = cacheTime;
 
-        Matcher matcher = PATTERN_PARAM.matcher(endpoint);
+        Matcher matcher = PATTERN.matcher(endpoint);
         List<String> p = new ArrayList();
         while (matcher.find()) {
             p.add(matcher.group(1));
@@ -86,10 +93,32 @@ public class Invokable {
      * @return
      * @throws InvokableException
      */
-    public Response invoke(Request request, Response response)
-            throws InvokableException {
+    public String invoke(Request request, Response response) throws InvokableException {
+        Config config = Config.getInstance();
 
         try {
+            File cacheDir = null;
+            if (cacheTime > 0) {
+                String hash = request.getHash();
+
+                cacheDir = new File(config.getCache(), hash);
+                if (cacheDir.exists()) {
+                    long now = System.currentTimeMillis() / 1000l;
+                    for (File file : cacheDir.listFiles(new FilenameFilter() {
+                        @Override
+                        public boolean accept(File dir, String name) {
+                            return name.toLowerCase().endsWith(".cache");
+                        }
+                    })) {
+                        long cacheExp = Long.parseLong(file.getName().split("\\.")[0]);
+                        if (cacheExp > now) {
+                            byte[] encoded = Files.readAllBytes(Paths.get(file.toURI()));
+                            return new String(encoded, "UTF-8");
+                        }
+                    }
+                }
+            }
+
             Map<String, String> map = new HashMap();
 
             Matcher matcher = pattern.matcher(request.getHttpMethod() + " "
@@ -107,15 +136,8 @@ public class Invokable {
 
             int i = 0;
 
-            MediaType mediaType = null;
-
-            String body;
-
             for (Annotation annotation : method.getAnnotations()) {
-                Class<? extends Annotation> annotationType
-                        = annotation.annotationType();
-
-                if (annotationType.equals(PathParam.class)) {
+                if (annotation.annotationType().equals(PathParam.class)) {
                     for (String key : ((PathParam) annotation).value()) {
                         if (map.containsKey(key)) {
                             objects[i] = cast(parameterTypes[i], map.get(key));
@@ -124,70 +146,55 @@ public class Invokable {
                         }
                         i++;
                     }
-                } else if (annotationType.equals(QueryStringParam.class)) {
+                } else if (annotation.annotationType().equals(QueryStringParam.class)) {
                     for (String key : ((QueryStringParam) annotation).value()) {
                         if (request.containsQueryString(key)) {
-                            objects[i] = cast(parameterTypes[i],
-                                    request.getQueryString(key));
+                            objects[i] = cast(parameterTypes[i], request.getQueryString(key));
                         } else {
                             objects[i] = null;
                         }
                         i++;
                     }
-                } else if (annotationType.equals(BodyParam.class)) {
-                    objects[i] = Config.getGson().fromJson(String.valueOf(
-                            request.getBody()).trim(), parameterTypes[i]);
+                } else if (annotation.annotationType().equals(BodyParam.class)) {
+                    objects[i] = GSON.fromJson(request.getBody(), parameterTypes[i]);
                     i++;
-                } else if (annotationType.equals(ReturnType.class)) {
-                    mediaType = ((ReturnType) annotation).value().mediaType;
                 }
             }
 
             Object invoked = method.invoke(clazz.newInstance(), objects);
 
-            if (mediaType == null) {
-                mediaType = MediaType.JSON_UTF_8;
+            String retorno = GSON.toJson(invoked);
+
+            if (cacheDir != null) {
+                if (cacheDir.exists()) {
+                    for (File file : cacheDir.listFiles()) {
+                        file.delete();
+                    }
+                    if (!cacheDir.delete()) {
+                        LOGGER.error("Não foi possível excluir cache: {}", cacheDir.toString());
+                    }
+                }
+
+                if (!cacheDir.mkdirs()) {
+                    LOGGER.error("Não foi possível criar cache: {}", cacheDir.toString());
+                }
+
+                String fileName = ((System.currentTimeMillis() / 1000l) + cacheTime) + ".cache";
+                PrintWriter pw = new PrintWriter(new File(cacheDir, fileName));
+                pw.print(retorno);
+                pw.flush();
+                pw.close();
             }
 
-            if (mediaType == MediaType.JSON_UTF_8) {
-                response.addHeader(HttpHeaders.CONTENT_TYPE,
-                        MediaType.JSON_UTF_8.toString());
-
-                response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
-                        "*");
-
-                response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
-                        "origin, content-type, accept, authorization");
-
-                response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS,
-                        "true");
-
-                response.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
-                        "GET, POST, PUT, DELETE, OPTIONS, HEAD");
-
-                body = Config.getGson().toJson(invoked);
-            } else {
-                response.addHeader(HttpHeaders.CONTENT_TYPE,
-                        mediaType.toString());
-
-                body = invoked.toString();
-            }
-
-            if (Strings.isNullOrEmpty(body)) {
-                response.clearHeaders();
-                response.setHttpStatus(HttpStatus.SC_NO_CONTENT);
-            } else {
-                response.setHttpStatus(HttpStatus.SC_OK);
-                response.setBody(body);
-            }
+            return retorno;
         } catch (InvocationTargetException e) {
-            throw new InvokableException(e.getTargetException()
-                    .getMessage(), e);
+            throw new InvokableException("[" + request.getPath() + "]\n"
+                    + e.getTargetException().getMessage(), e);
         } catch (Exception ex) {
-            throw new InvokableException(ex.getMessage(), ex);
+            throw new InvokableException("[" + request.getPath() + "]\n"
+                    + ex.getMessage(), ex);
         }
 
-        return response;
     }
 
     /**
@@ -205,31 +212,31 @@ public class Invokable {
      * @param value
      * @return
      */
-    private Object cast(Class type, String value)
-            throws UnsupportedEncodingException {
+    private Object cast(Class type, String value) throws UnsupportedEncodingException {
 
-        String decoded = URLDecoder.decode(value, "UTF-8");
+        value = URLDecoder.decode(value, "UTF-8");
 
         if (type.equals(Integer.class)) {
-            return Integer.parseInt(decoded);
+            return Integer.parseInt(value);
         } else if (type.equals(int.class)) {
-            return Integer.parseInt(decoded);
+            return Integer.parseInt(value);
         } else if (type.equals(Long.class)) {
-            return Long.parseLong(decoded);
+            return Long.parseLong(value);
         } else if (type.equals(long.class)) {
-            return Long.parseLong(decoded);
+            return Long.parseLong(value);
         } else if (type.equals(float.class)) {
-            return Float.parseFloat(decoded);
+            return Float.parseFloat(value);
         } else if (type.equals(Float.class)) {
-            return Float.parseFloat(decoded);
+            return Float.parseFloat(value);
         } else if (type.equals(boolean.class)) {
-            return Boolean.parseBoolean(decoded);
+            return Boolean.parseBoolean(value);
         } else if (type.equals(Boolean.class)) {
-            return Boolean.parseBoolean(decoded);
+            return Boolean.parseBoolean(value);
         } else if (type.equals(String.class)) {
-            return decoded;
+            return value;
         } else {
-            return type.cast(decoded);
+            return type.cast(value);
         }
     }
+
 }

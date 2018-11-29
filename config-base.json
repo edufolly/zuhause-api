@@ -1,4 +1,5 @@
 {
+    "cache": "cache",
     "tcpPort": 8088,
     "maxConnections": 5,
     "appPackage": "zuhause.ws",

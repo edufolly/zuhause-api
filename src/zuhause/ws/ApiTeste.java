@@ -1,5 +1,6 @@
 package zuhause.ws;
 
+import zuhause.annotations.Cache;
 import zuhause.annotations.GET;
 import zuhause.annotations.MediaTypeEnum;
 import zuhause.annotations.Path;
@@ -13,6 +14,7 @@ import zuhause.annotations.ReturnType;
 public class ApiTeste {
 
     @GET
+    @Cache(60)
     @ReturnType(MediaTypeEnum.TEXT)
     public String testeGet() {
         return "Teste OK!!";

@@ -1,7 +1,6 @@
 package zuhause;
 
 import zuhause.annotations.Path;
-import zuhause.annotations.WS;
 import zuhause.annotations.GET;
 import zuhause.annotations.PUT;
 import zuhause.annotations.POST;
@@ -17,6 +16,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import zuhause.annotations.Cache;
+import zuhause.annotations.OPTIONS;
 
 /**
  *
@@ -96,31 +97,6 @@ public class EndpointCache {
 
             String classEndpoint = "";
 
-            if (clazz.isAnnotationPresent(WS.class)) {
-                WS annotation = (WS) clazz.getAnnotation(WS.class);
-                classEndpoint = annotation.value();
-
-                if (!classEndpoint.startsWith("/")) {
-                    classEndpoint = "/" + classEndpoint;
-                }
-
-                if (classEndpoint.endsWith("/")) {
-                    classEndpoint = classEndpoint
-                            .substring(0, classEndpoint.length() - 1);
-                }
-
-                String patternEndpoint = classEndpoint
-                        .replaceAll(":([^/]+?)/", "([^/]+?)/");
-
-                String prefix = "WS";
-
-                Pattern compile = Pattern
-                        .compile(prefix + " " + patternEndpoint + "$");
-
-                cache.put(compile,
-                        new Invokable(clazz, null, patternEndpoint, compile));
-            }
-
             if (clazz.isAnnotationPresent(Path.class)) {
                 Path annotation = (Path) clazz.getAnnotation(Path.class);
                 classEndpoint = annotation.value();
@@ -178,6 +154,14 @@ public class EndpointCache {
                         prefix = "COPY";
                     } else if (method.isAnnotationPresent(HEAD.class)) {
                         prefix = "HEAD";
+                    } else if (method.isAnnotationPresent(OPTIONS.class)) {
+                        prefix = "OPTIONS";
+                    }
+
+                    // Cache
+                    long cacheTime = 0;
+                    if (method.isAnnotationPresent(Cache.class)) {
+                        cacheTime = method.getAnnotation(Cache.class).value();
                     }
 
                     if (prefix != null) {
@@ -185,7 +169,7 @@ public class EndpointCache {
                                 .compile(prefix + " " + patternEndpoint + "$");
 
                         cache.put(compile, new Invokable(clazz, method,
-                                finalEndpoint, compile));
+                                finalEndpoint, compile, cacheTime));
                     }
                 }
             }

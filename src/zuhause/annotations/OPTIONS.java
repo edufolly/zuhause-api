@@ -6,9 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 /**
  *
  * @author Eduardo Folly
+ *
+ * Não possui body.
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface WS {
+public @interface OPTIONS {
 
-    String value();
 }
